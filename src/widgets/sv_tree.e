@@ -159,11 +159,9 @@ feature -- Bulk Operations
 			-- Add multiple root nodes.
 		require
 			items_attached: a_items /= Void
-		local
-			l_dummy: INTEGER
 		do
 			across a_items as item loop
-				l_dummy := add_root (item.item)
+				add_root (item.item).do_nothing
 			end
 			Result := Current
 		ensure

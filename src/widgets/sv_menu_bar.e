@@ -88,13 +88,11 @@ feature -- Standard Menus
 
 	with_standard_menus: like Current
 			-- Add File, Edit, View, Help menus.
-		local
-			l_dummy: SV_MENU
 		do
-			l_dummy := file_menu
-			l_dummy := edit_menu
-			l_dummy := view_menu
-			l_dummy := help_menu
+			file_menu.do_nothing
+			edit_menu.do_nothing
+			view_menu.do_nothing
+			help_menu.do_nothing
 			Result := Current
 		ensure
 			result_is_current: Result = Current

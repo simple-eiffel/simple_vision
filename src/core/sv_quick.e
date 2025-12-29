@@ -1049,4 +1049,66 @@ feature -- State Machines (Phase 6.75)
 			Result := l_loader.load_from_file (a_path)
 		end
 
+feature -- Phase 7: Graphics (Cairo)
+
+	canvas (a_width, a_height: INTEGER): SV_CAIRO_CANVAS
+			-- Create Cairo canvas with specified size.
+		require
+			valid_width: a_width > 0
+			valid_height: a_height > 0
+		do
+			create Result.make (a_width, a_height)
+		ensure
+			result_attached: Result /= Void
+		end
+
+	canvas_empty: SV_CAIRO_CANVAS
+			-- Create Cairo canvas with default size.
+		do
+			create Result.make_empty
+		ensure
+			result_attached: Result /= Void
+		end
+
+	drawing_area (a_width, a_height: INTEGER): SV_CAIRO_CANVAS
+			-- Create drawing area (alias for canvas).
+		require
+			valid_width: a_width > 0
+			valid_height: a_height > 0
+		do
+			Result := canvas (a_width, a_height)
+		ensure
+			result_attached: Result /= Void
+		end
+
+	waveform (a_width, a_height: INTEGER): SV_WAVEFORM
+			-- Create waveform display with specified size.
+		require
+			valid_width: a_width > 0
+			valid_height: a_height > 0
+		do
+			create Result.make (a_width, a_height)
+		ensure
+			result_attached: Result /= Void
+		end
+
+	waveform_default: SV_WAVEFORM
+			-- Create waveform display with default size.
+		do
+			create Result.make_default
+		ensure
+			result_attached: Result /= Void
+		end
+
+	audio_waveform (a_width, a_height: INTEGER): SV_WAVEFORM
+			-- Create audio waveform display (alias).
+		require
+			valid_width: a_width > 0
+			valid_height: a_height > 0
+		do
+			Result := waveform (a_width, a_height)
+		ensure
+			result_attached: Result /= Void
+		end
+
 end

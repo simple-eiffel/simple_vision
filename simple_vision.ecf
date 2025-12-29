@@ -24,6 +24,7 @@
 		<library name="simple_decimal" location="$SIMPLE_EIFFEL\simple_decimal\simple_decimal.ecf"/>
 		<library name="simple_json" location="$SIMPLE_EIFFEL\simple_json\simple_json.ecf"/>
 		<library name="simple_regex" location="$SIMPLE_EIFFEL\simple_regex\simple_regex.ecf"/>
+		<library name="simple_cairo" location="$SIMPLE_EIFFEL\simple_cairo\simple_cairo.ecf"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="lib_tests" extends="simple_vision">
@@ -63,6 +64,10 @@
 	</target>
 	<target name="demo_form" extends="simple_vision">
 		<root class="DEMO_FORM" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_cairo" extends="simple_vision">
+		<root class="DEMO_CAIRO" feature="make"/>
 		<cluster name="demos" location=".\demos\"/>
 	</target>
 </system>
