@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-22-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-22-0 http://www.eiffel.com/developers/xml/configuration-1-22-0.xsd" name="simple_vision" uuid="A1B2C3D4-5678-9ABC-DEF0-123456789ABC" library_target="simple_vision">
+	<description>simple_vision: Modern, simplified wrapper over EiffelVision-2</description>
+	<target name="simple_vision">
+		<root all_classes="true"/>
+		<file_rule>
+			<exclude>/EIFGENs$</exclude>
+			<exclude>/\.git$</exclude>
+			<exclude>/\.svn$</exclude>
+			<exclude>/demos$</exclude>
+		</file_rule>
+		<option warning="warning" is_obsolete_iteration="true">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="false"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="none"/>
+			<void_safety support="all"/>
+		</capability>
+		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
+		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
+		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2.ecf"/>
+		<library name="simple_decimal" location="$SIMPLE_EIFFEL\simple_decimal\simple_decimal.ecf"/>
+		<library name="simple_regex" location="$SIMPLE_EIFFEL\simple_regex\simple_regex.ecf"/>
+		<cluster name="src" location=".\src\" recursive="true"/>
+	</target>
+	<target name="lib_tests" extends="simple_vision">
+		<root class="LIB_TESTS" feature="make"/>
+		<setting name="console_application" value="true"/>
+		<library name="eqa_testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<library name="simple_testing" location="$SIMPLE_EIFFEL\simple_testing\simple_testing.ecf"/>
+		<cluster name="tests" location=".\testing\"/>
+	</target>
+	<target name="demo_hello" extends="simple_vision">
+		<root class="DEMO_HELLO" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_login" extends="simple_vision">
+		<root class="DEMO_LOGIN" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_layout" extends="simple_vision">
+		<root class="DEMO_LAYOUT" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_data" extends="simple_vision">
+		<root class="DEMO_DATA" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_theme" extends="simple_vision">
+		<root class="DEMO_THEME" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_grid" extends="simple_vision">
+		<root class="DEMO_GRID" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+	<target name="demo_masked" extends="simple_vision">
+		<root class="DEMO_MASKED" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
+</system>

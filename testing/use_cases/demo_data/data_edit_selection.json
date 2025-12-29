@@ -1,0 +1,44 @@
+{
+  "name": "data_edit_selection",
+  "version": "1.0.0",
+  "description": "Test Edit button requires row selection",
+  "tags": ["data_grid", "crud"],
+  "setup": {
+    "window": "DEMO_DATA"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "click",
+      "target": "button_edit",
+      "comment": "Click edit without selection"
+    },
+    {
+      "step": 2,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Select a row to edit"
+    },
+    {
+      "step": 3,
+      "action": "select_cell",
+      "target": "grid_data",
+      "value": [1, 1],
+      "comment": "Select first row"
+    },
+    {
+      "step": 4,
+      "action": "click",
+      "target": "button_edit"
+    },
+    {
+      "step": 5,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Editing row 1"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

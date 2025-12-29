@@ -1,0 +1,150 @@
+{
+  "name": "Hello World Demo",
+  "description": "Automated test for the simple_vision Hello World demo",
+  "target": "DEMO_HELLO",
+  "steps": [
+    {
+      "id": 1,
+      "action": "assert_window_visible",
+      "target": "main_window",
+      "description": "Verify the main window is displayed"
+    },
+    {
+      "id": 2,
+      "action": "assert_window_title",
+      "target": "main_window",
+      "value": "simple_vision Demo",
+      "description": "Verify window has correct title"
+    },
+    {
+      "id": 3,
+      "action": "assert_text",
+      "target": "header_label",
+      "value": "Hello, simple_vision!",
+      "description": "Verify header text is displayed"
+    },
+    {
+      "id": 4,
+      "action": "assert_text",
+      "target": "status_label",
+      "value": "Click the button!",
+      "description": "Verify initial status text"
+    },
+    {
+      "id": 5,
+      "action": "assert_enabled",
+      "target": "click_button",
+      "description": "Verify Click Me button is enabled"
+    },
+    {
+      "id": 6,
+      "action": "assert_enabled",
+      "target": "quit_button",
+      "description": "Verify Quit button is enabled"
+    },
+    {
+      "id": 7,
+      "action": "click",
+      "target": "click_button",
+      "description": "Click the 'Click Me!' button first time"
+    },
+    {
+      "id": 8,
+      "action": "wait",
+      "milliseconds": 100,
+      "description": "Brief pause for UI update"
+    },
+    {
+      "id": 9,
+      "action": "assert_text",
+      "target": "status_label",
+      "value": "Clicked 1 time!",
+      "description": "Verify count shows singular form"
+    },
+    {
+      "id": 10,
+      "action": "click",
+      "target": "click_button",
+      "description": "Click the button second time"
+    },
+    {
+      "id": 11,
+      "action": "wait",
+      "milliseconds": 100,
+      "description": "Brief pause for UI update"
+    },
+    {
+      "id": 12,
+      "action": "assert_text",
+      "target": "status_label",
+      "value": "Clicked 2 times!",
+      "description": "Verify count shows plural form"
+    },
+    {
+      "id": 13,
+      "action": "click",
+      "target": "click_button",
+      "repeat": 3,
+      "description": "Click the button 3 more times"
+    },
+    {
+      "id": 14,
+      "action": "wait",
+      "milliseconds": 100,
+      "description": "Brief pause for UI update"
+    },
+    {
+      "id": 15,
+      "action": "assert_text",
+      "target": "status_label",
+      "value": "Clicked 5 times!",
+      "description": "Verify count is now 5"
+    },
+    {
+      "id": 16,
+      "action": "click",
+      "target": "quit_button",
+      "description": "Click the Quit button to close"
+    },
+    {
+      "id": 17,
+      "action": "wait",
+      "milliseconds": 200,
+      "description": "Wait for window to close"
+    },
+    {
+      "id": 18,
+      "action": "assert_window_closed",
+      "target": "main_window",
+      "description": "Verify window has closed"
+    }
+  ],
+  "visual_states": {
+    "initial": "A window titled 'simple_vision Demo' with a column layout containing: a bold header 'Hello, simple_vision!', a status label 'Click the button!', and a row with two buttons 'Click Me!' and 'Quit'.",
+    "after_first_click": "Same layout but the status label now shows 'Clicked 1 time!'.",
+    "after_multiple_clicks": "Same layout but the status label shows 'Clicked N times!' where N is the click count."
+  },
+  "widget_map": {
+    "main_window": {
+      "class": "SV_WINDOW",
+      "locator": "title:simple_vision Demo"
+    },
+    "header_label": {
+      "class": "SV_TEXT",
+      "locator": "content:Hello, simple_vision!"
+    },
+    "status_label": {
+      "class": "SV_TEXT",
+      "locator": "index:1",
+      "parent": "column:0"
+    },
+    "click_button": {
+      "class": "SV_BUTTON",
+      "locator": "label:Click Me!"
+    },
+    "quit_button": {
+      "class": "SV_BUTTON",
+      "locator": "label:Quit"
+    }
+  }
+}

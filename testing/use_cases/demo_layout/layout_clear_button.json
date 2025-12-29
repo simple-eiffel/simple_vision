@@ -1,0 +1,31 @@
+{
+  "name": "layout_clear_button",
+  "version": "1.0.0",
+  "description": "Test clear button updates status text",
+  "tags": ["button", "smoke"],
+  "setup": {
+    "window": "DEMO_LAYOUT"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "click",
+      "target": "button_refresh",
+      "comment": "First refresh to change state"
+    },
+    {
+      "step": 2,
+      "action": "click",
+      "target": "button_clear"
+    },
+    {
+      "step": 3,
+      "action": "assert_text",
+      "target": "label_status",
+      "expected": "Cleared"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

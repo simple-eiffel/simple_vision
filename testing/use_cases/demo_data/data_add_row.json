@@ -1,0 +1,47 @@
+{
+  "name": "data_add_row",
+  "version": "1.0.0",
+  "description": "Test Add button creates new row in data grid",
+  "tags": ["data_grid", "crud", "smoke"],
+  "setup": {
+    "window": "DEMO_DATA",
+    "initial_state": {
+      "grid_data": {"row_count": 5}
+    }
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "assert_count",
+      "target": "grid_data",
+      "expected": 5,
+      "comment": "Initially 5 rows"
+    },
+    {
+      "step": 2,
+      "action": "click",
+      "target": "button_add"
+    },
+    {
+      "step": 3,
+      "action": "assert_count",
+      "target": "grid_data",
+      "expected": 6
+    },
+    {
+      "step": 4,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Added new record"
+    },
+    {
+      "step": 5,
+      "action": "assert_text",
+      "target": "label_count",
+      "expected": "6 records"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

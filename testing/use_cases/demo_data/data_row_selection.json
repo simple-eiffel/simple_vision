@@ -1,0 +1,40 @@
+{
+  "name": "data_row_selection",
+  "version": "1.0.0",
+  "description": "Test row selection updates status bar",
+  "tags": ["data_grid", "selection"],
+  "setup": {
+    "window": "DEMO_DATA"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "select_cell",
+      "target": "grid_data",
+      "value": [1, 1],
+      "comment": "Select first row (Alice Smith)"
+    },
+    {
+      "step": 2,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Selected row 1: Alice Smith"
+    },
+    {
+      "step": 3,
+      "action": "select_cell",
+      "target": "grid_data",
+      "value": [3, 1],
+      "comment": "Select third row (Carol White)"
+    },
+    {
+      "step": 4,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Selected row 3: Carol White"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

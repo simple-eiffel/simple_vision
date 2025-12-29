@@ -1,0 +1,31 @@
+{
+  "name": "layout_refresh_button",
+  "version": "1.0.0",
+  "description": "Test refresh button updates status text",
+  "tags": ["button", "smoke"],
+  "setup": {
+    "window": "DEMO_LAYOUT"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "assert_text",
+      "target": "label_status",
+      "expected": "Ready"
+    },
+    {
+      "step": 2,
+      "action": "click",
+      "target": "button_refresh"
+    },
+    {
+      "step": 3,
+      "action": "assert_text",
+      "target": "label_status",
+      "expected": "Refreshed"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

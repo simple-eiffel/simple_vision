@@ -1,0 +1,48 @@
+{
+  "name": "login_cancel",
+  "version": "1.0.0",
+  "description": "Test cancel button clears all fields",
+  "tags": ["reset", "smoke"],
+  "setup": {
+    "window": "DEMO_LOGIN"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "type",
+      "target": "field_username",
+      "value": "testuser"
+    },
+    {
+      "step": 2,
+      "action": "type",
+      "target": "field_password",
+      "value": "secret123"
+    },
+    {
+      "step": 3,
+      "action": "check",
+      "target": "checkbox_remember"
+    },
+    {
+      "step": 4,
+      "action": "click",
+      "target": "button_cancel"
+    },
+    {
+      "step": 5,
+      "action": "assert_text",
+      "target": "label_status",
+      "expected": "Enter your credentials"
+    },
+    {
+      "step": 6,
+      "action": "assert_value",
+      "target": "field_username",
+      "expected": ""
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

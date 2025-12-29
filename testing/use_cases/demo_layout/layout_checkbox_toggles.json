@@ -1,0 +1,50 @@
+{
+  "name": "layout_checkbox_toggles",
+  "version": "1.0.0",
+  "description": "Test settings checkboxes toggle correctly",
+  "tags": ["checkbox", "settings"],
+  "setup": {
+    "window": "DEMO_LAYOUT"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "assert_checked",
+      "target": "checkbox_notifications",
+      "expected": true,
+      "comment": "Initially checked"
+    },
+    {
+      "step": 2,
+      "action": "click",
+      "target": "checkbox_notifications"
+    },
+    {
+      "step": 3,
+      "action": "assert_checked",
+      "target": "checkbox_notifications",
+      "expected": false
+    },
+    {
+      "step": 4,
+      "action": "assert_checked",
+      "target": "checkbox_darkmode",
+      "expected": false,
+      "comment": "Initially unchecked"
+    },
+    {
+      "step": 5,
+      "action": "click",
+      "target": "checkbox_darkmode"
+    },
+    {
+      "step": 6,
+      "action": "assert_checked",
+      "target": "checkbox_darkmode",
+      "expected": true
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

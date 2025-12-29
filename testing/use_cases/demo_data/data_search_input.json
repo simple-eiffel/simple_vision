@@ -1,0 +1,43 @@
+{
+  "name": "data_search_input",
+  "version": "1.0.0",
+  "description": "Test search field and button behavior",
+  "tags": ["search", "text_input"],
+  "setup": {
+    "window": "DEMO_DATA"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "click",
+      "target": "button_search",
+      "comment": "Search with empty field"
+    },
+    {
+      "step": 2,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Enter search term"
+    },
+    {
+      "step": 3,
+      "action": "type",
+      "target": "field_search",
+      "value": "Alice"
+    },
+    {
+      "step": 4,
+      "action": "click",
+      "target": "button_search"
+    },
+    {
+      "step": 5,
+      "action": "assert_text",
+      "target": "statusbar_main",
+      "expected": "Searching for: Alice"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}

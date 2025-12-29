@@ -1,0 +1,26 @@
+{
+  "name": "login_empty_username",
+  "version": "1.0.0",
+  "description": "Test login form validation when username is empty",
+  "tags": ["validation", "smoke"],
+  "setup": {
+    "window": "DEMO_LOGIN"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "action": "click",
+      "target": "button_login",
+      "comment": "Click login without entering any credentials"
+    },
+    {
+      "step": 2,
+      "action": "assert_text",
+      "target": "label_status",
+      "expected": "Please enter username"
+    }
+  ],
+  "teardown": {
+    "cleanup": "close_window"
+  }
+}
