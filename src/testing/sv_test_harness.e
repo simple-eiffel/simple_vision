@@ -168,6 +168,61 @@ feature -- Event Injection
 			record_event (a_widget, create {SV_EVENT}.make_key (0, a_text))
 		end
 
+	simulate_type (a_widget: SV_WIDGET; a_text: STRING)
+			-- Simulate typing text into a text input widget (actually sets text).
+		require
+			widget_attached: a_widget /= Void
+			text_not_void: a_text /= Void
+		do
+			debug_log ("Simulating type: " + a_text)
+			if attached {SV_TEXT_FIELD} a_widget as tf then
+				tf.set_text (a_text)
+			elseif attached {SV_MASKED_FIELD} a_widget as mf then
+				mf.set_text (a_text)
+			elseif attached {SV_PASSWORD_FIELD} a_widget as pf then
+				pf.set_text (a_text)
+			end
+			record_event (a_widget, create {SV_EVENT}.make_key (0, a_text))
+		end
+
+	simulate_type_by_name (a_name: STRING; a_text: STRING)
+			-- Simulate typing into registered widget by name.
+		require
+			name_not_empty: not a_name.is_empty
+			text_not_void: a_text /= Void
+		do
+			if attached widget (a_name) as w then
+				simulate_type (w, a_text)
+			else
+				record_assertion (False, "Widget not found: " + a_name)
+			end
+		end
+
+	simulate_select (a_widget: SV_WIDGET; a_index: INTEGER)
+			-- Simulate selecting item at index in dropdown/list.
+		require
+			widget_attached: a_widget /= Void
+			valid_index: a_index >= 1
+		do
+			debug_log ("Simulating select index: " + a_index.out)
+			if attached {SV_DROPDOWN} a_widget as dd then
+				dd.select_index (a_index)
+			end
+			record_event (a_widget, create {SV_EVENT}.make_state_change ("selection", "", a_index.out))
+		end
+
+	simulate_check (a_widget: SV_WIDGET; a_checked: BOOLEAN)
+			-- Simulate checking/unchecking a checkbox.
+		require
+			widget_attached: a_widget /= Void
+		do
+			debug_log ("Simulating check: " + a_checked.out)
+			if attached {SV_CHECKBOX} a_widget as cb then
+				if a_checked then cb.check_now else cb.uncheck_now end
+			end
+			record_event (a_widget, create {SV_EVENT}.make_state_change ("checked", "", a_checked.out))
+		end
+
 feature -- Assertions
 
 	assert_text (a_widget: SV_TEXT; a_expected: STRING): BOOLEAN
@@ -292,6 +347,205 @@ feature -- Results
 			Result.append ("%N--- Details ---%N")
 			across assertions as a loop
 				Result.append ((if a.item.passed then "[PASS] " else "[FAIL] " end) + a.item.description + "%N")
+			end
+		end
+
+feature -- State Machine Testing
+
+	register_state_machine (a_machine: SV_STATE_MACHINE; a_name: STRING)
+			-- Register state machine for testing.
+		require
+			machine_attached: a_machine /= Void
+			name_not_empty: not a_name.is_empty
+		do
+			if not attached state_machines then
+				create state_machines.make (5)
+			end
+			if attached state_machines as sm then
+				sm.put (a_machine, a_name)
+			end
+		ensure
+			registered: attached state_machines as sm and then sm.has (a_name)
+		end
+
+	state_machine (a_name: STRING): detachable SV_STATE_MACHINE
+			-- Get registered state machine.
+		require
+			name_not_empty: not a_name.is_empty
+		do
+			if attached state_machines as sm then
+				Result := sm.item (a_name)
+			end
+		end
+
+	assert_state (a_machine_name: STRING; a_expected_state: STRING): BOOLEAN
+			-- Assert state machine is in expected state.
+		require
+			machine_name_not_empty: not a_machine_name.is_empty
+			state_not_empty: not a_expected_state.is_empty
+		do
+			if attached state_machine (a_machine_name) as sm then
+				Result := sm.is_in (a_expected_state)
+				record_assertion (Result,
+					"assert_state: " + a_machine_name + " expected '" + a_expected_state +
+					"', actual '" + sm.current_state_name + "'")
+			else
+				Result := False
+				record_assertion (False, "State machine not found: " + a_machine_name)
+			end
+		end
+
+	trigger_event (a_machine_name: STRING; a_event: STRING): BOOLEAN
+			-- Trigger event on state machine, return True if transition occurred.
+		require
+			machine_name_not_empty: not a_machine_name.is_empty
+			event_not_empty: not a_event.is_empty
+		do
+			if attached state_machine (a_machine_name) as sm then
+				Result := sm.trigger (a_event)
+				debug_log ("Triggered '" + a_event + "' on " + a_machine_name +
+					": " + (if Result then "transitioned" else "no transition" end))
+			else
+				debug_log ("State machine not found: " + a_machine_name)
+			end
+		end
+
+	test_all_pathways (a_machine: SV_STATE_MACHINE): ARRAYED_LIST [TUPLE [path: ARRAYED_LIST [STRING]; success: BOOLEAN]]
+			-- Test all possible pathways through state machine.
+			-- Returns list of paths with success/failure status.
+		require
+			machine_attached: a_machine /= Void
+			machine_valid: a_machine.is_valid
+		local
+			l_paths: ARRAYED_LIST [ARRAYED_LIST [STRING]]
+			l_path: ARRAYED_LIST [STRING]
+		do
+			create Result.make (20)
+			l_paths := enumerate_paths (a_machine)
+
+			across l_paths as path loop
+				l_path := path.item
+				a_machine.reset
+				Result.extend ([l_path, execute_path (a_machine, l_path)])
+			end
+		end
+
+	pathway_coverage_report (a_machine: SV_STATE_MACHINE): STRING
+			-- Generate pathway coverage report.
+		require
+			machine_attached: a_machine /= Void
+		local
+			l_results: ARRAYED_LIST [TUPLE [path: ARRAYED_LIST [STRING]; success: BOOLEAN]]
+			l_passed, l_total: INTEGER
+		do
+			l_results := test_all_pathways (a_machine)
+			l_total := l_results.count
+
+			create Result.make (500)
+			Result.append ("=== Pathway Coverage Report ===%N")
+			Result.append ("State Machine: " + a_machine.name + "%N")
+			Result.append ("States: " + a_machine.states.count.out + "%N")
+			Result.append ("Transitions: " + a_machine.transitions.count.out + "%N")
+			Result.append ("%N--- Pathways Tested ---%N")
+
+			across l_results as r loop
+				if r.item.success then
+					l_passed := l_passed + 1
+					Result.append ("[PASS] ")
+				else
+					Result.append ("[FAIL] ")
+				end
+				Result.append (path_to_string (r.item.path) + "%N")
+			end
+
+			Result.append ("%N--- Summary ---%N")
+			Result.append ("Pathways: " + l_passed.out + "/" + l_total.out + " passed%N")
+		end
+
+feature {NONE} -- State Machine Testing Implementation
+
+	state_machines: detachable HASH_TABLE [SV_STATE_MACHINE, STRING]
+			-- Registered state machines.
+
+	enumerate_paths (a_machine: SV_STATE_MACHINE): ARRAYED_LIST [ARRAYED_LIST [STRING]]
+			-- Enumerate all simple paths from initial state (limited depth).
+		local
+			l_path: ARRAYED_LIST [STRING]
+			l_visited: HASH_TABLE [BOOLEAN, STRING]
+		do
+			create Result.make (20)
+			create l_path.make (10)
+			create l_visited.make (10)
+
+			if attached a_machine.initial_state as init then
+				enumerate_paths_recursive (a_machine, init, l_path, l_visited, Result, 10)
+			end
+		end
+
+	enumerate_paths_recursive (a_machine: SV_STATE_MACHINE; a_state: STRING;
+			a_path: ARRAYED_LIST [STRING]; a_visited: HASH_TABLE [BOOLEAN, STRING];
+			a_results: ARRAYED_LIST [ARRAYED_LIST [STRING]]; a_depth: INTEGER)
+			-- Recursively enumerate paths.
+		local
+			l_events: ARRAYED_LIST [STRING]
+			l_path_copy: ARRAYED_LIST [STRING]
+		do
+			if a_depth <= 0 then
+				-- Max depth reached, save current path
+				a_results.extend (a_path.twin)
+			elseif a_visited.has (a_state) then
+				-- Cycle detected, save current path
+				a_results.extend (a_path.twin)
+			else
+				a_visited.put (True, a_state)
+				l_events := a_machine.events_from (a_state)
+
+				if l_events.is_empty then
+					-- Terminal state, save path
+					a_results.extend (a_path.twin)
+				else
+					across l_events as ev loop
+						l_path_copy := a_path.twin
+						l_path_copy.extend (ev.item)
+
+						-- Find target state
+						across a_machine.transitions as t loop
+							if t.item.from_state.same_string (a_state) and
+							   t.item.event.same_string (ev.item) then
+								enumerate_paths_recursive (a_machine, t.item.to_state,
+									l_path_copy, a_visited.twin, a_results, a_depth - 1)
+							end
+						end
+					end
+				end
+
+				a_visited.remove (a_state)
+			end
+		end
+
+	execute_path (a_machine: SV_STATE_MACHINE; a_events: ARRAYED_LIST [STRING]): BOOLEAN
+			-- Execute path of events, return True if all succeed.
+		do
+			Result := True
+			across a_events as ev loop
+				if Result then
+					Result := a_machine.trigger (ev.item)
+				end
+			end
+		end
+
+	path_to_string (a_path: ARRAYED_LIST [STRING]): STRING
+			-- Convert event path to readable string.
+		do
+			create Result.make (50)
+			across a_path as ev loop
+				if not Result.is_empty then
+					Result.append (" -> ")
+				end
+				Result.append (ev.item)
+			end
+			if Result.is_empty then
+				Result := "(empty path)"
 			end
 		end
 

@@ -1015,4 +1015,38 @@ feature -- Forms (Phase 6.75)
 			result_attached: Result /= Void
 		end
 
+feature -- State Machines (Phase 6.75)
+
+	state_machine (a_name: STRING): SV_STATE_MACHINE
+			-- Create named state machine.
+		require
+			name_not_empty: not a_name.is_empty
+		do
+			create Result.make (a_name)
+		ensure
+			result_attached: Result /= Void
+		end
+
+	state_machine_from_json (a_json: STRING): detachable SV_STATE_MACHINE
+			-- Create state machine from JSON definition.
+		require
+			json_not_empty: not a_json.is_empty
+		local
+			l_loader: SV_STATE_MACHINE_LOADER
+		do
+			create l_loader.make
+			Result := l_loader.load_from_json (a_json)
+		end
+
+	state_machine_from_file (a_path: STRING): detachable SV_STATE_MACHINE
+			-- Load state machine from JSON file.
+		require
+			path_not_empty: not a_path.is_empty
+		local
+			l_loader: SV_STATE_MACHINE_LOADER
+		do
+			create l_loader.make
+			Result := l_loader.load_from_file (a_path)
+		end
+
 end
