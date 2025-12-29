@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_vision - Modern GUI Toolkit for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_vision</h1>
+        <p class="tagline">Modern GUI Toolkit for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-version">Phase 7</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#widgets">Widgets</a></li>
+            <li><a href="#forms">Forms</a></li>
+            <li><a href="#state-machines">State Machines</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_vision">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_vision</strong> is a comprehensive GUI toolkit for Eiffel that provides a
+                <strong>fluent API</strong> for building desktop applications. It wraps EiffelVision2 with
+                modern naming conventions, rich widgets, form validation, state machines, and Cairo graphics.
+            </p>
+            <p>
+                Part of the <a href="https://github.com/simple-eiffel">Simple Eiffel</a> ecosystem.
+            </p>
+        </section>
+
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+
+            <h3>Installation</h3>
+            <ol>
+                <li>Set the environment variable:
+<pre><code>export SIMPLE_EIFFEL=/d/prod</code></pre>
+                </li>
+                <li>Add to your ECF file:
+<pre><code>&lt;library name="simple_vision" location="$SIMPLE_EIFFEL/simple_vision/simple_vision.ecf"/&gt;</code></pre>
+                </li>
+            </ol>
+
+            <h3>Hello World</h3>
+<pre><code><span class="keyword">class</span>
+    <span class="type">MY_APP</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">SV_APPLICATION</span>
+
+<span class="keyword">create</span>
+    make_and_launch
+
+<span class="keyword">feature</span> {<span class="type">NONE</span>} <span class="comment">-- Initialization</span>
+
+    make_and_launch
+        <span class="keyword">do</span>
+            default_create
+            launch
+        <span class="keyword">end</span>
+
+    build_main_window
+        <span class="keyword">local</span>
+            sv: <span class="type">SV_QUICK</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> sv.make
+            main_window := sv.window (<span class="string">"My App"</span>)
+                .sized (400, 300)
+                .child (
+                    sv.column_of (&lt;&lt;
+                        sv.text (<span class="string">"Hello, simple_vision!"</span>),
+                        sv.button (<span class="string">"Click Me"</span>).on_click (<span class="keyword">agent</span> handle_click)
+                    &gt;&gt;)
+                    .padding (20)
+                    .spacing (10)
+                )
+        <span class="keyword">end</span>
+
+    handle_click
+        <span class="keyword">do</span>
+            print (<span class="string">"Button clicked!%N"</span>)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="widgets">
+            <h2>Widget Gallery</h2>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Basic Widgets</h4>
+                    <p>text, button, checkbox, radio_group, dropdown, list</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Input Fields</h4>
+                    <p>text_field, password_field, decimal_field, masked_field</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Range Widgets</h4>
+                    <p>slider, progress_bar, spin_box</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Containers</h4>
+                    <p>row, column, grid, stack, tabs, splitter, card, scroll</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Data Widgets</h4>
+                    <p>data_grid, tree</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Application Chrome</h4>
+                    <p>menu_bar, toolbar, statusbar, dialog</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Masked Fields</h4>
+                    <p>phone, email, date, credit_card, ssn, zip, ip_address, time</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4>Graphics</h4>
+                    <p>canvas (Cairo), waveform, image</p>
+                </div>
+            </div>
+
+            <h3>Widget Factory (SV_QUICK)</h3>
+<pre><code><span class="keyword">local</span>
+    sv: <span class="type">SV_QUICK</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> sv.make
+
+    <span class="comment">-- Windows</span>
+    sv.window (<span class="string">"Title"</span>)
+
+    <span class="comment">-- Containers</span>
+    sv.row                              <span class="comment">-- Horizontal box</span>
+    sv.column                           <span class="comment">-- Vertical box</span>
+    sv.row_of (&lt;&lt;widget1, widget2&gt;&gt;)    <span class="comment">-- Row with children</span>
+    sv.tabs                             <span class="comment">-- Tab panel</span>
+    sv.horizontal_splitter              <span class="comment">-- Left/right split</span>
+
+    <span class="comment">-- Basic Widgets</span>
+    sv.text (<span class="string">"Label text"</span>)
+    sv.button (<span class="string">"Click Me"</span>)
+    sv.text_field
+    sv.checkbox (<span class="string">"Enable feature"</span>)
+    sv.radios (&lt;&lt;<span class="string">"Option 1"</span>, <span class="string">"Option 2"</span>&gt;&gt;)
+    sv.dropdown_with (&lt;&lt;<span class="string">"Choice A"</span>, <span class="string">"Choice B"</span>&gt;&gt;)
+
+    <span class="comment">-- Masked Fields (Phase 6.75)</span>
+    sv.phone_field
+    sv.email_field
+    sv.date_field
+    sv.credit_card_field
+
+    <span class="comment">-- Dialogs</span>
+    sv.info_box (<span class="string">"Information message"</span>)
+    sv.question_box (<span class="string">"Are you sure?"</span>)
+    sv.open_file_dialog
+    sv.color_picker
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="forms">
+            <h2>Form Validation</h2>
+            <p>
+                simple_vision includes a form validation system with built-in rules for common scenarios.
+            </p>
+
+<pre><code><span class="keyword">local</span>
+    sv: <span class="type">SV_QUICK</span>
+    my_form: <span class="type">SV_FORM</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> sv.make
+
+    my_form := sv.form
+        .add_field (sv.field (<span class="string">"username"</span>)
+            .widget (sv.text_field)
+            .required
+            .min_length (3)
+            .max_length (20))
+        .add_field (sv.field (<span class="string">"email"</span>)
+            .widget (sv.email_field)
+            .required)
+        .add_field (sv.field (<span class="string">"age"</span>)
+            .widget (sv.spin_box_range (18, 120))
+            .range (18, 120))
+        .on_valid (<span class="keyword">agent</span> handle_submit)
+<span class="keyword">end</span></code></pre>
+
+            <h3>Built-in Validation Rules</h3>
+            <table class="api-table">
+                <tr><th>Rule</th><th>Description</th></tr>
+                <tr><td><code>required</code></td><td>Field must have a value</td></tr>
+                <tr><td><code>min_length (n)</code></td><td>Minimum character length</td></tr>
+                <tr><td><code>max_length (n)</code></td><td>Maximum character length</td></tr>
+                <tr><td><code>range (min, max)</code></td><td>Numeric range validation</td></tr>
+                <tr><td><code>email</code></td><td>Valid email format</td></tr>
+                <tr><td><code>pattern (regex)</code></td><td>Custom regex pattern</td></tr>
+            </table>
+        </section>
+
+        <section id="state-machines">
+            <h2>State Machines</h2>
+            <p>
+                Declarative UI state management with fluent API and JSON configuration support.
+            </p>
+
+<pre><code><span class="keyword">local</span>
+    sv: <span class="type">SV_QUICK</span>
+    machine: <span class="type">SV_STATE_MACHINE</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> sv.make
+
+    <span class="comment">-- Create programmatically</span>
+    machine := sv.state_machine (<span class="string">"auth"</span>)
+    machine.state (<span class="string">"logged_out"</span>).described_as (<span class="string">"User not logged in"</span>).do_nothing
+    machine.state (<span class="string">"logging_in"</span>).described_as (<span class="string">"Authentication in progress"</span>).do_nothing
+    machine.state (<span class="string">"logged_in"</span>).described_as (<span class="string">"User authenticated"</span>).do_nothing
+
+    machine.on (<span class="string">"login"</span>).from_state (<span class="string">"logged_out"</span>).to (<span class="string">"logging_in"</span>).apply.do_nothing
+    machine.on (<span class="string">"success"</span>).from_state (<span class="string">"logging_in"</span>).to (<span class="string">"logged_in"</span>).apply.do_nothing
+    machine.on (<span class="string">"logout"</span>).from_state (<span class="string">"logged_in"</span>).to (<span class="string">"logged_out"</span>).apply.do_nothing
+
+    machine.set_initial (<span class="string">"logged_out"</span>)
+
+    <span class="comment">-- Trigger transitions</span>
+    machine.trigger (<span class="string">"login"</span>)
+    print (<span class="string">"Current state: "</span> + machine.current_state.name + <span class="string">"%N"</span>)
+
+    <span class="comment">-- Or load from JSON file</span>
+    <span class="keyword">if</span> <span class="keyword">attached</span> sv.state_machine_from_file (<span class="string">"auth.json"</span>) <span class="keyword">as</span> m <span class="keyword">then</span>
+        m.trigger (<span class="string">"login"</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="theming">
+            <h2>Theming</h2>
+            <p>
+                Built-in support for dark mode, color schemes, and UI scaling.
+            </p>
+
+<pre><code><span class="keyword">local</span>
+    sv: <span class="type">SV_QUICK</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> sv.make
+
+    <span class="comment">-- Dark mode</span>
+    sv.set_dark_mode (<span class="keyword">True</span>)
+    sv.toggle_dark_mode
+
+    <span class="comment">-- Color schemes</span>
+    sv.set_color_scheme (<span class="string">"blue"</span>)
+    sv.set_color_scheme (<span class="string">"green"</span>)
+    sv.set_color_scheme (<span class="string">"purple"</span>)
+
+    <span class="comment">-- UI scaling</span>
+    sv.set_ui_scale (1.25)  <span class="comment">-- 125%</span>
+    sv.increase_ui_scale
+    sv.decrease_ui_scale
+    sv.reset_ui_scale
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="graphics">
+            <h2>Cairo Graphics (Phase 7)</h2>
+            <p>
+                Custom drawing with Cairo integration and waveform visualization for audio applications.
+            </p>
+
+<pre><code><span class="keyword">local</span>
+    sv: <span class="type">SV_QUICK</span>
+    canvas: <span class="type">SV_CAIRO_CANVAS</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> sv.make
+
+    <span class="comment">-- Create drawing canvas</span>
+    canvas := sv.canvas (400, 300)
+        .background_hex (0xFFFFFF)
+        .on_draw (<span class="keyword">agent</span> draw_content)
+
+    <span class="comment">-- Waveform display for audio</span>
+    waveform := sv.waveform (300, 100)
+        .foreground_hex (0x3498DB)
+        .background_hex (0x2C3E50)
+<span class="keyword">end</span>
+
+draw_content (a_context: <span class="type">CAIRO_CONTEXT</span>)
+    <span class="keyword">do</span>
+        a_context.set_color_hex (0x3498DB)
+            .fill_rect (10, 10, 100, 50)
+            .do_nothing
+        a_context.set_color_hex (0xE74C3C)
+            .stroke_circle (200, 150, 40)
+            .do_nothing
+    <span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="api">
+            <h2>API Classes</h2>
+            <table class="api-table">
+                <tr><th>Category</th><th>Classes</th></tr>
+                <tr><td>Core</td><td>SV_APPLICATION, SV_QUICK, SV_ANY</td></tr>
+                <tr><td>Windows</td><td>SV_WINDOW</td></tr>
+                <tr><td>Containers</td><td>SV_ROW, SV_COLUMN, SV_BOX, SV_GRID, SV_STACK, SV_TAB_PANEL, SV_SPLITTER, SV_CARD, SV_SCROLL</td></tr>
+                <tr><td>Basic Widgets</td><td>SV_TEXT, SV_BUTTON, SV_CHECKBOX, SV_RADIO_GROUP, SV_DROPDOWN, SV_LIST, SV_SLIDER, SV_PROGRESS_BAR, SV_SPIN_BOX</td></tr>
+                <tr><td>Input Fields</td><td>SV_TEXT_FIELD, SV_PASSWORD_FIELD, SV_DECIMAL_FIELD, SV_MASKED_FIELD</td></tr>
+                <tr><td>Data Widgets</td><td>SV_DATA_GRID, SV_TREE</td></tr>
+                <tr><td>Application</td><td>SV_MENU_BAR, SV_MENU, SV_MENU_ITEM, SV_TOOLBAR, SV_TOOLBAR_BUTTON, SV_STATUSBAR</td></tr>
+                <tr><td>Dialogs</td><td>SV_DIALOG, SV_FILE_DIALOG, SV_MESSAGE_BOX, SV_COLOR_PICKER, SV_FONT_PICKER</td></tr>
+                <tr><td>Forms</td><td>SV_FORM, SV_FIELD, SV_VALIDATION_RULE</td></tr>
+                <tr><td>State</td><td>SV_STATE_MACHINE, SV_STATE, SV_TRANSITION</td></tr>
+                <tr><td>Graphics</td><td>SV_CAIRO_CANVAS, SV_WAVEFORM, SV_IMAGE</td></tr>
+                <tr><td>Styling</td><td>SV_THEME, SV_COLOR, SV_TOKENS</td></tr>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 simple_* ecosystem. MIT License.</p>
+        <p>
+            <a href="https://github.com/simple-eiffel/simple_vision">GitHub</a> |
+            <a href="https://simple-eiffel.github.io">Documentation</a>
+        </p>
+    </footer>
+</body>
+</html>
