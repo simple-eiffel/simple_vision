@@ -70,4 +70,8 @@
 		<root class="DEMO_CAIRO" feature="make"/>
 		<cluster name="demos" location=".\demos\"/>
 	</target>
+	<target name="demo_state_machine" extends="simple_vision">
+		<root class="DEMO_STATE_MACHINE" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
 </system>
