@@ -60,4 +60,8 @@
 		<root class="DEMO_MASKED" feature="make"/>
 		<cluster name="demos" location=".\demos\"/>
 	</target>
+	<target name="demo_form" extends="simple_vision">
+		<root class="DEMO_FORM" feature="make"/>
+		<cluster name="demos" location=".\demos\"/>
+	</target>
 </system>

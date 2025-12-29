@@ -985,4 +985,34 @@ feature -- Theming
 			theme.reset_scale
 		end
 
+feature -- Forms (Phase 6.75)
+
+	form: SV_FORM
+			-- Create empty form.
+		do
+			create Result.make
+		ensure
+			result_attached: Result /= Void
+		end
+
+	field (a_name: STRING): SV_FIELD
+			-- Create form field with name.
+		require
+			name_not_empty: not a_name.is_empty
+		do
+			create Result.make (a_name)
+		ensure
+			result_attached: Result /= Void
+		end
+
+	form_field (a_name: STRING): SV_FIELD
+			-- Create form field with name (alias).
+		require
+			name_not_empty: not a_name.is_empty
+		do
+			Result := field (a_name)
+		ensure
+			result_attached: Result /= Void
+		end
+
 end
