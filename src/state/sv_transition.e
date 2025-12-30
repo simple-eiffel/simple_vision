@@ -44,21 +44,27 @@ feature -- Guard
 	guard: detachable FUNCTION [BOOLEAN]
 			-- Optional condition that must be true for transition to occur.
 
-	set_guard (a_guard: FUNCTION [BOOLEAN]): like Current
+feature -- Guard Commands
+
+	set_guard (a_guard: FUNCTION [BOOLEAN])
 			-- Set guard condition.
 		do
 			guard := a_guard
+		ensure
+			guard_set: guard = a_guard
+		end
+
+feature -- Guard Fluent
+
+	only_if,
+	guarded_by,
+	with_guard (a_guard: FUNCTION [BOOLEAN]): like Current
+			-- Fluent: set guard condition for this transition.
+		do
+			set_guard (a_guard)
 			Result := Current
 		ensure
 			guard_set: guard = a_guard
-			result_is_current: Result = Current
-		end
-
-	only_if (a_guard: FUNCTION [BOOLEAN]): like Current
-			-- Fluent alias for set_guard.
-		do
-			Result := set_guard (a_guard)
-		ensure
 			result_is_current: Result = Current
 		end
 
@@ -77,22 +83,14 @@ feature -- Action
 	action: detachable PROCEDURE
 			-- Optional action executed during transition.
 
-	set_action (a_action: PROCEDURE): like Current
+feature -- Action Commands
+
+	set_action (a_action: PROCEDURE)
 			-- Set transition action.
 		do
 			action := a_action
-			Result := Current
 		ensure
 			action_set: action = a_action
-			result_is_current: Result = Current
-		end
-
-	do_action (a_action: PROCEDURE): like Current
-			-- Fluent alias for set_action.
-		do
-			Result := set_action (a_action)
-		ensure
-			result_is_current: Result = Current
 		end
 
 	execute_action
@@ -103,15 +101,39 @@ feature -- Action
 			end
 		end
 
+feature -- Action Fluent
+
+	then_do,
+	executing,
+	with_action (a_action: PROCEDURE): like Current
+			-- Fluent: set action to execute during this transition.
+		do
+			set_action (a_action)
+			Result := Current
+		ensure
+			action_set: action = a_action
+			result_is_current: Result = Current
+		end
+
 feature -- Metadata
 
 	description: detachable STRING
 			-- Optional description of this transition.
 
-	set_description (a_desc: STRING): like Current
+feature -- Metadata Commands
+
+	set_description (a_desc: STRING)
 			-- Set transition description.
 		do
 			description := a_desc
+		end
+
+feature -- Metadata Fluent
+
+	with_description (a_desc: STRING): like Current
+			-- Fluent: set description and return Current.
+		do
+			set_description (a_desc)
 			Result := Current
 		ensure
 			result_is_current: Result = Current

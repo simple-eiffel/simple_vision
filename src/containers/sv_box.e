@@ -9,6 +9,9 @@ deferred class
 
 inherit
 	SV_CONTAINER
+		redefine
+			extend
+		end
 
 feature -- Access
 
@@ -57,6 +60,17 @@ feature -- Fluent Configuration
 			Result := padding (a_border)
 		ensure
 			result_is_current: Result = Current
+		end
+
+feature -- Adding Children
+
+	extend (a_widget: SV_WIDGET)
+			-- Add a child widget, respecting its expansion hint.
+		do
+			Precursor (a_widget)
+			if not a_widget.is_expandable then
+				ev_box.disable_item_expand (a_widget.ev_widget)
+			end
 		end
 
 feature -- Children (Fluent)

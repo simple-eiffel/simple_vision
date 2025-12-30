@@ -86,7 +86,7 @@ feature -- Loading
 					if attached obj.string_item ("initial") as jinit then
 						l_initial := jinit.to_string_8
 						if l_machine.has_state (l_initial) then
-							if attached l_machine.set_initial (l_initial) then end
+							l_machine.set_initial (l_initial)
 						else
 							last_error := "Initial state '" + l_initial + "' not found"
 						end
@@ -163,7 +163,7 @@ feature {NONE} -- Implementation
 
 						-- Optional description
 						if attached state_obj.string_item ("description") as jdesc then
-							if attached l_state.set_description (jdesc.to_string_8) then end
+							l_state.set_description (jdesc.to_string_8)
 						end
 					end
 				end
@@ -197,7 +197,7 @@ feature {NONE} -- Implementation
 							across a_machine.all_state_names as state_name loop
 								if a_machine.has_state (l_to) then
 									create l_transition.make (l_event, state_name.item, l_to)
-									if attached a_machine.add_transition (l_transition) then end
+									a_machine.add_transition (l_transition)
 								end
 							end
 						else
@@ -207,10 +207,10 @@ feature {NONE} -- Implementation
 
 								-- Optional description
 								if attached trans_obj.string_item ("description") as jdesc then
-									if attached l_transition.set_description (jdesc.to_string_8) then end
+									l_transition.set_description (jdesc.to_string_8)
 								end
 
-								if attached a_machine.add_transition (l_transition) then end
+								a_machine.add_transition (l_transition)
 							else
 								if not a_machine.has_state (l_from) then
 									last_error := "Unknown state: " + l_from

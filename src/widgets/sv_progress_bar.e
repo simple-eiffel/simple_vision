@@ -1,5 +1,5 @@
 note
-	description: "Progress bar widget - uses EV_HORIZONTAL_RANGE in display mode"
+	description: "Progress bar widget - wraps EV_HORIZONTAL_PROGRESS_BAR"
 	author: "Larry Rix"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -19,11 +19,9 @@ feature {NONE} -- Initialization
 	make
 			-- Create progress bar with default range 0-100.
 		do
-			create ev_range
-			ev_range.value_range.adapt (0 |..| 100)
-			ev_range.set_value (0)
-			-- Disable user interaction to make it display-only
-			ev_range.disable_sensitive
+			create ev_progress
+			ev_progress.value_range.adapt (0 |..| 100)
+			ev_progress.set_value (0)
 		end
 
 	make_with_range (a_min, a_max: INTEGER)
@@ -31,10 +29,9 @@ feature {NONE} -- Initialization
 		require
 			valid_range: a_min < a_max
 		do
-			create ev_range
-			ev_range.value_range.adapt (a_min |..| a_max)
-			ev_range.set_value (a_min)
-			ev_range.disable_sensitive
+			create ev_progress
+			ev_progress.value_range.adapt (a_min |..| a_max)
+			ev_progress.set_value (a_min)
 		ensure
 			min_set: minimum = a_min
 			max_set: maximum = a_max
@@ -42,31 +39,31 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	ev_range: EV_HORIZONTAL_RANGE
-			-- Underlying EiffelVision-2 range widget (used as progress display).
+	ev_progress: EV_HORIZONTAL_PROGRESS_BAR
+			-- Underlying EiffelVision-2 progress bar widget.
 
 	ev_widget: EV_WIDGET
 			-- Implement SV_WIDGET requirement.
 		do
-			Result := ev_range
+			Result := ev_progress
 		end
 
 	value: INTEGER
 			-- Current progress value.
 		do
-			Result := ev_range.value
+			Result := ev_progress.value
 		end
 
 	minimum: INTEGER
 			-- Minimum value.
 		do
-			Result := ev_range.value_range.lower
+			Result := ev_progress.value_range.lower
 		end
 
 	maximum: INTEGER
 			-- Maximum value.
 		do
-			Result := ev_range.value_range.upper
+			Result := ev_progress.value_range.upper
 		end
 
 	percentage: REAL_64
@@ -94,7 +91,7 @@ feature -- Value Operations
 		require
 			valid_value: a_value >= minimum and a_value <= maximum
 		do
-			ev_range.set_value (a_value)
+			ev_progress.set_value (a_value)
 		ensure
 			value_set: value = a_value
 		end
@@ -163,11 +160,11 @@ feature -- Range Configuration
 		require
 			valid_range: a_min < a_max
 		do
-			ev_range.value_range.adapt (a_min |..| a_max)
+			ev_progress.value_range.adapt (a_min |..| a_max)
 			if value < a_min then
-				ev_range.set_value (a_min)
+				ev_progress.set_value (a_min)
 			elseif value > a_max then
-				ev_range.set_value (a_max)
+				ev_progress.set_value (a_max)
 			end
 			Result := Current
 		ensure
@@ -201,7 +198,7 @@ feature -- Status
 		end
 
 invariant
-	ev_range_exists: ev_range /= Void
+	ev_progress_exists: ev_progress /= Void
 	valid_value: value >= minimum and value <= maximum
 
 end

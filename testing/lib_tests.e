@@ -57,6 +57,9 @@ feature {NONE} -- Initialization
 			run_test (agent test_demo_login_harness, "Demo: Login Form")
 			run_test (agent test_demo_layout_harness, "Demo: Complex Layout")
 			run_test (agent test_demo_data_harness, "Demo: Data Browser")
+			run_test (agent test_state_machine_basic, "State Machine Basic")
+			run_test (agent test_state_machine_logging, "State Machine Logging")
+			run_test (agent test_state_machine_unstarted_contract, "State Machine Unstarted Contract")
 
 			print ("%N=== Results: " + pass_count.out + "/" + test_count.out + " passed ===%N")
 		end
@@ -1512,6 +1515,125 @@ feature -- Test Cases
 			check_true ("all_passed", harness.all_assertions_passed)
 
 			print ("%N" + harness.report)
+		end
+
+
+
+	test_state_machine_basic
+			-- Test basic state machine operation.
+		local
+			quick: SV_QUICK
+			sm: SV_STATE_MACHINE
+		do
+			create quick.make
+			
+			-- Create a simple state machine
+			sm := quick.state_machine ("test_sm")
+			
+			-- Add states
+			sm.state ("idle").described_as ("Waiting").do_nothing
+			sm.state ("working").described_as ("Processing").do_nothing
+			sm.state ("done").described_as ("Complete").do_nothing
+			
+			-- Add transitions
+			sm.on ("start").from_state ("idle").to ("working").apply.do_nothing
+			sm.on ("finish").from_state ("working").to ("done").apply.do_nothing
+			sm.on ("reset").from_state ("done").to ("idle").apply.do_nothing
+			
+			-- Set initial state and start
+			sm.set_initial ("idle")
+			check_true ("not_started_initially", not sm.is_started)
+			
+			sm.start
+			check_true ("started_after_start", sm.is_started)
+			check_string_equal ("initial_state", "idle", sm.current_state_name)
+			
+			-- Trigger transitions
+			check_true ("trigger_start", sm.trigger ("start"))
+			check_string_equal ("in_working", "working", sm.current_state_name)
+			
+			check_true ("trigger_finish", sm.trigger ("finish"))
+			check_string_equal ("in_done", "done", sm.current_state_name)
+			
+			-- Invalid event from current state should return False
+			check_true ("invalid_start_from_done", not sm.trigger ("start"))
+			check_string_equal ("still_in_done", "done", sm.current_state_name)
+			
+			-- Valid reset
+			check_true ("trigger_reset", sm.trigger ("reset"))
+			check_string_equal ("back_to_idle", "idle", sm.current_state_name)
+		end
+
+	test_state_machine_logging
+			-- Test state machine logging functionality.
+		local
+			quick: SV_QUICK
+			sm: SV_STATE_MACHINE
+		do
+			create quick.make
+			
+			-- Create simple state machine
+			sm := quick.state_machine ("log_test")
+			sm.state ("a").do_nothing
+			sm.state ("b").do_nothing
+			sm.on ("go").from_state ("a").to ("b").apply.do_nothing
+			sm.set_initial ("a")
+			sm.start
+			
+			-- Enable logging
+			sm.enable_logging
+			check_true ("logging_enabled", sm.is_logging_enabled)
+			
+			-- Trigger and check log
+			sm.trigger ("go").do_nothing
+			check_true ("log_has_transition", sm.last_log_message.has_substring ("go"))
+			check_true ("log_has_from", sm.last_log_message.has_substring ("a"))
+			check_true ("log_has_to", sm.last_log_message.has_substring ("b"))
+			
+			-- Try invalid event and check log
+			sm.trigger ("invalid").do_nothing
+			check_true ("log_has_no_transition", sm.last_log_message.has_substring ("no transition"))
+			
+			-- Disable logging
+			sm.disable_logging
+			check_true ("logging_disabled", not sm.is_logging_enabled)
+		end
+
+	test_state_machine_unstarted_contract
+			-- Test that trigger on unstarted machine violates precondition.
+		local
+			quick: SV_QUICK
+			sm: SV_STATE_MACHINE
+			l_retried: BOOLEAN
+			l_precondition_failed: BOOLEAN
+		do
+			if not l_retried then
+				create quick.make
+				
+				-- Create state machine but DON'T start it
+				sm := quick.state_machine ("unstarted")
+				sm.state ("idle").do_nothing
+				sm.state ("running").do_nothing
+				sm.on ("go").from_state ("idle").to ("running").apply.do_nothing
+				sm.set_initial ("idle")
+				-- Note: NOT calling sm.start
+				
+				check_true ("machine_not_started", not sm.is_started)
+				
+				-- This should fail the precondition
+				sm.trigger ("go").do_nothing
+				
+				-- If we get here, contract was not enforced (bad!)
+				check_true ("precondition_should_have_failed", False)
+			else
+				-- We caught an exception - that's the expected behavior
+				l_precondition_failed := True
+			end
+			
+			check_true ("precondition_was_enforced", l_precondition_failed)
+		rescue
+			l_retried := True
+			retry
 		end
 
 end

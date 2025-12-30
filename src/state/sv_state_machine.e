@@ -55,13 +55,24 @@ feature -- State Management
 	initial_state: detachable STRING
 			-- Name of initial state.
 
-	add_state (a_state: SV_STATE): like Current
+	add_state (a_state: SV_STATE)
 			-- Add state to machine.
 		require
 			state_attached: a_state /= Void
 			unique_name: not states.has (a_state.name)
 		do
 			states.put (a_state, a_state.name)
+		ensure
+			state_added: states.has (a_state.name)
+		end
+
+	with_state (a_state: SV_STATE): like Current
+			-- Fluent: add state and return Current.
+		require
+			state_attached: a_state /= Void
+			unique_name: not states.has (a_state.name)
+		do
+			add_state (a_state)
 			Result := Current
 		ensure
 			state_added: states.has (a_state.name)
@@ -94,12 +105,22 @@ feature -- State Management
 			Result := states.has (a_name)
 		end
 
-	set_initial (a_state_name: STRING): like Current
+	set_initial (a_state_name: STRING)
 			-- Set initial state.
 		require
 			state_exists: has_state (a_state_name)
 		do
 			initial_state := a_state_name
+		ensure
+			initial_set: attached initial_state as i and then i.same_string (a_state_name)
+		end
+
+	with_initial (a_state_name: STRING): like Current
+			-- Fluent: set initial state and return Current.
+		require
+			state_exists: has_state (a_state_name)
+		do
+			set_initial (a_state_name)
 			Result := Current
 		ensure
 			initial_set: attached initial_state as i and then i.same_string (a_state_name)
@@ -137,7 +158,7 @@ feature -- Transitions
 	transitions: ARRAYED_LIST [SV_TRANSITION]
 			-- All defined transitions.
 
-	add_transition (a_transition: SV_TRANSITION): like Current
+	add_transition (a_transition: SV_TRANSITION)
 			-- Add transition to machine.
 		require
 			transition_attached: a_transition /= Void
@@ -149,6 +170,18 @@ feature -- Transitions
 			if attached states.item (a_transition.from_state) as from_s then
 				from_s.allowed_transitions.extend (a_transition.to_state)
 			end
+		ensure
+			transition_added: transitions.has (a_transition)
+		end
+
+	with_transition (a_transition: SV_TRANSITION): like Current
+			-- Fluent: add transition and return Current.
+		require
+			transition_attached: a_transition /= Void
+			from_state_exists: has_state (a_transition.from_state)
+			to_state_exists: has_state (a_transition.to_state)
+		do
+			add_transition (a_transition)
 			Result := Current
 		ensure
 			transition_added: transitions.has (a_transition)
@@ -168,13 +201,21 @@ feature -- Transitions
 			-- Returns True if transition occurred.
 		require
 			event_not_empty: not a_event.is_empty
+			machine_started: is_started
 		local
 			l_transition: detachable SV_TRANSITION
 		do
 			l_transition := find_transition (a_event)
-			if attached l_transition as t and then t.is_allowed then
-				execute_transition (t)
-				Result := True
+			if attached l_transition as t then
+				if t.is_allowed then
+					log_transition (a_event, current_state_name, t.to_state, True)
+					execute_transition (t)
+					Result := True
+				else
+					log_transition (a_event, current_state_name, t.to_state, False)
+				end
+			else
+				log_no_transition (a_event, current_state_name)
 			end
 		end
 
@@ -182,6 +223,7 @@ feature -- Transitions
 			-- Can this event be triggered in current state?
 		require
 			event_not_empty: not a_event.is_empty
+			machine_started: is_started
 		local
 			l_transition: detachable SV_TRANSITION
 		do
@@ -235,12 +277,20 @@ feature -- Events
 	state_change_actions: ACTION_SEQUENCE [TUPLE [from_state, to_state: STRING]]
 			-- Actions called on any state change.
 
-	on_state_change (a_action: PROCEDURE [TUPLE [STRING, STRING]]): like Current
+	add_state_change_action (a_action: PROCEDURE [TUPLE [STRING, STRING]])
 			-- Add action for state changes.
 		require
 			action_attached: a_action /= Void
 		do
 			state_change_actions.extend (a_action)
+		end
+
+	on_state_change (a_action: PROCEDURE [TUPLE [STRING, STRING]]): like Current
+			-- Fluent: add state change action and return Current.
+		require
+			action_attached: a_action /= Void
+		do
+			add_state_change_action (a_action)
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -332,6 +382,62 @@ feature -- Pathway Analysis (for testing)
 						Result.extend (t.item.event)
 					end
 				end
+			end
+		end
+
+feature -- Logging
+
+	is_logging_enabled: BOOLEAN
+			-- Is transition logging enabled?
+			-- Enable for debugging and testing.
+
+	enable_logging
+			-- Enable transition logging.
+		do
+			is_logging_enabled := True
+		ensure
+			logging_enabled: is_logging_enabled
+		end
+
+	disable_logging
+			-- Disable transition logging.
+		do
+			is_logging_enabled := False
+		ensure
+			logging_disabled: not is_logging_enabled
+		end
+
+	last_log_message: STRING
+			-- Most recent log message (for testing).
+		attribute
+			Result := ""
+		end
+
+feature {NONE} -- Logging Implementation
+
+	log_transition (a_event, a_from, a_to: STRING; a_allowed: BOOLEAN)
+			-- Log a transition attempt.
+		require
+			event_not_empty: not a_event.is_empty
+		do
+			if a_allowed then
+				last_log_message := "[" + name + "] " + a_event + ": " + a_from + " -> " + a_to
+			else
+				last_log_message := "[" + name + "] " + a_event + ": " + a_from + " -> " + a_to + " (BLOCKED by guard)"
+			end
+			if is_logging_enabled then
+				debug_log (last_log_message)
+			end
+		end
+
+	log_no_transition (a_event, a_from: STRING)
+			-- Log when no transition found for event.
+		require
+			event_not_empty: not a_event.is_empty
+		do
+			last_log_message := "[" + name + "] " + a_event + ": no transition from " + a_from
+			if is_logging_enabled then
+				debug_log (last_log_message)
 			end
 		end
 

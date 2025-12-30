@@ -106,12 +106,12 @@ feature -- Building
 			check attached from_state_name as f and attached to_state_name as t then
 				create l_transition.make (event, f, t)
 				if attached transition_guard as g then
-					if attached l_transition.set_guard (g) then end
+					l_transition.set_guard (g)
 				end
 				if attached transition_action as a then
-					if attached l_transition.set_action (a) then end
+					l_transition.set_action (a)
 				end
-				if attached machine.add_transition (l_transition) then end
+				machine.add_transition (l_transition)
 			end
 			Result := machine
 		end

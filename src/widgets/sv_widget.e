@@ -194,6 +194,53 @@ feature -- State
 			result_is_current: Result = Current
 		end
 
+feature -- Layout Hints
+
+	expansion_prevented: BOOLEAN
+			-- Should this widget NOT expand when placed in a box container?
+			-- Default is False (widgets expand to fill available space).
+
+	is_expandable: BOOLEAN
+			-- Should this widget expand when placed in a box container?
+			-- This is the inverse of expansion_prevented.
+		do
+			Result := not expansion_prevented
+		end
+
+feature -- Layout Hint Commands
+
+	set_expansion_prevented (a_value: BOOLEAN)
+			-- Set whether this widget should be prevented from expanding.
+		do
+			expansion_prevented := a_value
+		ensure
+			expansion_prevented_set: expansion_prevented = a_value
+		end
+
+feature -- Layout Hint Fluent
+
+	no_expand,
+	compact: like Current
+			-- Fluent: mark this widget as non-expandable.
+			-- Use when adding to a box to prevent stretching.
+		do
+			set_expansion_prevented (True)
+			Result := Current
+		ensure
+			not_expandable: not is_expandable
+			result_is_current: Result = Current
+		end
+
+	expandable: like Current
+			-- Fluent: mark this widget as expandable (default).
+		do
+			set_expansion_prevented (False)
+			Result := Current
+		ensure
+			is_expandable_now: is_expandable
+			result_is_current: Result = Current
+		end
+
 feature -- Sizing
 
 	set_minimum_size (a_width, a_height: INTEGER): like Current

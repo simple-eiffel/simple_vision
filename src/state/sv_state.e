@@ -36,39 +36,45 @@ feature -- Actions
 	on_exit: detachable PROCEDURE
 			-- Action executed when leaving this state.
 
-	set_on_enter (a_action: PROCEDURE): like Current
+feature -- Action Commands
+
+	set_on_enter (a_action: PROCEDURE)
 			-- Set entry action.
 		do
 			on_enter := a_action
+		ensure
+			action_set: on_enter = a_action
+		end
+
+	set_on_exit (a_action: PROCEDURE)
+			-- Set exit action.
+		do
+			on_exit := a_action
+		ensure
+			action_set: on_exit = a_action
+		end
+
+feature -- Action Fluent
+
+	enter_action,
+	with_on_enter (a_action: PROCEDURE): like Current
+			-- Fluent: set entry action and return Current.
+		do
+			set_on_enter (a_action)
 			Result := Current
 		ensure
 			action_set: on_enter = a_action
 			result_is_current: Result = Current
 		end
 
-	set_on_exit (a_action: PROCEDURE): like Current
-			-- Set exit action.
+	exit_action,
+	with_on_exit (a_action: PROCEDURE): like Current
+			-- Fluent: set exit action and return Current.
 		do
-			on_exit := a_action
+			set_on_exit (a_action)
 			Result := Current
 		ensure
 			action_set: on_exit = a_action
-			result_is_current: Result = Current
-		end
-
-	enter_action (a_action: PROCEDURE): like Current
-			-- Fluent alias for set_on_enter.
-		do
-			Result := set_on_enter (a_action)
-		ensure
-			result_is_current: Result = Current
-		end
-
-	exit_action (a_action: PROCEDURE): like Current
-			-- Fluent alias for set_on_exit.
-		do
-			Result := set_on_exit (a_action)
-		ensure
 			result_is_current: Result = Current
 		end
 
@@ -76,20 +82,6 @@ feature -- Transitions
 
 	allowed_transitions: ARRAYED_LIST [STRING]
 			-- Names of states we can transition TO from this state.
-
-	allow_transition_to (a_state_name: STRING): like Current
-			-- Allow transition to named state.
-		require
-			name_not_empty: not a_state_name.is_empty
-		do
-			if not allowed_transitions.has (a_state_name) then
-				allowed_transitions.extend (a_state_name)
-			end
-			Result := Current
-		ensure
-			allowed: allowed_transitions.has (a_state_name)
-			result_is_current: Result = Current
-		end
 
 	can_transition_to (a_state_name: STRING): BOOLEAN
 			-- Is transition to named state allowed?
@@ -99,13 +91,32 @@ feature -- Transitions
 			Result := allowed_transitions.has (a_state_name)
 		end
 
-	allows (a_state_name: STRING): like Current
-			-- Fluent alias for allow_transition_to.
+feature -- Transition Commands
+
+	allow_transition_to (a_state_name: STRING)
+			-- Allow transition to named state.
 		require
 			name_not_empty: not a_state_name.is_empty
 		do
-			Result := allow_transition_to (a_state_name)
+			if not allowed_transitions.has (a_state_name) then
+				allowed_transitions.extend (a_state_name)
+			end
 		ensure
+			allowed: allowed_transitions.has (a_state_name)
+		end
+
+feature -- Transition Fluent
+
+	allows,
+	with_transition_to (a_state_name: STRING): like Current
+			-- Fluent: allow transition and return Current.
+		require
+			name_not_empty: not a_state_name.is_empty
+		do
+			allow_transition_to (a_state_name)
+			Result := Current
+		ensure
+			allowed: allowed_transitions.has (a_state_name)
 			result_is_current: Result = Current
 		end
 
@@ -114,19 +125,22 @@ feature -- Metadata
 	description: detachable STRING
 			-- Optional description of this state.
 
-	set_description (a_desc: STRING): like Current
+feature -- Metadata Commands
+
+	set_description (a_desc: STRING)
 			-- Set state description.
 		do
 			description := a_desc
-			Result := Current
-		ensure
-			result_is_current: Result = Current
 		end
 
-	described_as (a_desc: STRING): like Current
-			-- Fluent alias for set_description.
+feature -- Metadata Fluent
+
+	described_as,
+	with_description (a_desc: STRING): like Current
+			-- Fluent: set description and return Current.
 		do
-			Result := set_description (a_desc)
+			set_description (a_desc)
+			Result := Current
 		ensure
 			result_is_current: Result = Current
 		end
