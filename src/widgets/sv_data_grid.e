@@ -469,42 +469,24 @@ feature {NONE} -- Implementation
 			-- Return row_data sorted by current column and direction.
 		local
 			l_result: ARRAYED_LIST [ARRAY [STRING]]
+			l_sorter: SIMPLE_SORTER [ARRAY [STRING]]
 			l_col: INTEGER
-			l_asc: BOOLEAN
 		do
 			create l_result.make_from_iterable (row_data)
 			l_col := sort_column
-			l_asc := (sort_direction = Sort_ascending)
-			sort_list (l_result, l_col, l_asc)
+			create l_sorter.make
+			if sort_direction = Sort_ascending then
+				l_sorter.sort_by (l_result, agent row_column_key (?, l_col))
+			else
+				l_sorter.sort_by_descending (l_result, agent row_column_key (?, l_col))
+			end
 			Result := l_result
 		end
 
-	sort_list (a_list: ARRAYED_LIST [ARRAY [STRING]]; a_col: INTEGER; a_ascending: BOOLEAN)
-			-- Simple bubble sort on list by column.
-		local
-			i, j: INTEGER
-			l_swapped: BOOLEAN
-			l_temp: ARRAY [STRING]
-			l_cmp: INTEGER
+	row_column_key (a_row: ARRAY [STRING]; a_col: INTEGER): STRING
+			-- Extract column value for sorting.
 		do
-			from i := a_list.count until i <= 1 loop
-				l_swapped := False
-				from j := 1 until j >= i loop
-					l_cmp := a_list [j] [a_col].three_way_comparison (a_list [j + 1] [a_col])
-					if (a_ascending and l_cmp > 0) or (not a_ascending and l_cmp < 0) then
-						l_temp := a_list [j]
-						a_list [j] := a_list [j + 1]
-						a_list [j + 1] := l_temp
-						l_swapped := True
-					end
-					j := j + 1
-				end
-				if not l_swapped then
-					i := 1 -- Exit early if no swaps
-				else
-					i := i - 1
-				end
-			end
+			Result := a_row [a_col]
 		end
 
 	add_row_internal (a_values: ARRAY [STRING])

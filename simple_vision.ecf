@@ -25,6 +25,7 @@
 		<library name="simple_json" location="$SIMPLE_EIFFEL\simple_json\simple_json.ecf"/>
 		<library name="simple_regex" location="$SIMPLE_EIFFEL\simple_regex\simple_regex.ecf"/>
 		<library name="simple_cairo" location="$SIMPLE_EIFFEL\simple_cairo\simple_cairo.ecf"/>
+		<library name="simple_sorter" location="$SIMPLE_EIFFEL\simple_sorter\simple_sorter.ecf"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="lib_tests" extends="simple_vision">
