@@ -29,7 +29,7 @@
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="lib_tests" extends="simple_vision">
-		<root class="LIB_TESTS" feature="make"/>
+		<root class="TEST_APP" feature="make"/>
 		<setting name="console_application" value="true"/>
 		<library name="eqa_testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
 		<library name="simple_testing" location="$SIMPLE_EIFFEL\simple_testing\simple_testing.ecf"/>
