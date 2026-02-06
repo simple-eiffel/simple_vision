@@ -32,8 +32,7 @@ feature {NONE} -- Test Runners
 
 	run_lib_tests
 		do
-			create lib_tests
-			run_test (agent lib_tests.test_creation, "test_creation")
+			create lib_tests.make
 		end
 
 feature {NONE} -- Implementation
