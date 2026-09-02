@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 			subscribe_to_theme
 		end
 
-	make_with_options (a_options: ARRAY [STRING])
+	make_with_options (a_options: ARRAY [READABLE_STRING_GENERAL])
 			-- Create radio group with options.
 		require
 			options_attached: a_options /= Void
@@ -57,7 +57,7 @@ feature -- Access
 	radio_buttons: ARRAYED_LIST [EV_RADIO_BUTTON]
 			-- Individual radio buttons.
 
-	option_values: ARRAYED_LIST [STRING]
+	option_values: ARRAYED_LIST [STRING_32]
 			-- Values associated with each option.
 
 	selected_index: INTEGER
@@ -70,19 +70,19 @@ feature -- Access
 			end
 		end
 
-	selected_value: STRING
+	selected_value: STRING_32
 			-- Value of selected option.
 		do
 			if selected_index > 0 and selected_index <= option_values.count then
 				Result := option_values [selected_index]
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
 feature -- Options
 
-	add_option (a_label: STRING)
+	add_option (a_label: READABLE_STRING_GENERAL)
 			-- Add a radio option.
 			-- Note: Radio buttons automatically form a group when added to the same container.
 		require
@@ -90,16 +90,16 @@ feature -- Options
 		local
 			l_radio: EV_RADIO_BUTTON
 		do
-			create l_radio.make_with_text (a_label)
+			create l_radio.make_with_text (a_label.to_string_32)
 			radio_buttons.extend (l_radio)
-			option_values.extend (a_label)
+			option_values.extend (a_label.to_string_32)
 			ev_vertical_box.extend (l_radio)
 			l_radio.select_actions.extend (agent on_selection_changed)
 		ensure
 			added: radio_buttons.count = old radio_buttons.count + 1
 		end
 
-	options (a_options: ARRAY [STRING]): like Current
+	options (a_options: ARRAY [READABLE_STRING_GENERAL]): like Current
 			-- Add multiple options (fluent).
 		require
 			options_attached: a_options /= Void
@@ -112,7 +112,7 @@ feature -- Options
 			result_is_current: Result = Current
 		end
 
-	add_option_with_value (a_label, a_value: STRING)
+	add_option_with_value (a_label, a_value: READABLE_STRING_GENERAL)
 			-- Add option with separate display label and value.
 		require
 			label_not_empty: not a_label.is_empty
@@ -120,9 +120,9 @@ feature -- Options
 		local
 			l_radio: EV_RADIO_BUTTON
 		do
-			create l_radio.make_with_text (a_label)
+			create l_radio.make_with_text (a_label.to_string_32)
 			radio_buttons.extend (l_radio)
-			option_values.extend (a_value)
+			option_values.extend (a_value.to_string_32)
 			ev_vertical_box.extend (l_radio)
 			l_radio.select_actions.extend (agent on_selection_changed)
 		end
@@ -139,7 +139,7 @@ feature -- Selection
 			selected: selected_index = a_index
 		end
 
-	select_value (a_value: STRING)
+	select_value (a_value: READABLE_STRING_GENERAL)
 			-- Select option by value.
 		require
 			value_not_empty: not a_value.is_empty
@@ -147,7 +147,7 @@ feature -- Selection
 			i: INTEGER
 		do
 			from i := 1 until i > option_values.count loop
-				if option_values [i].same_string (a_value) then
+				if option_values [i].same_string_general (a_value) then
 					select_index (i)
 				end
 				i := i + 1
@@ -196,7 +196,7 @@ feature -- Layout
 
 feature -- Events
 
-	on_change (a_action: PROCEDURE [STRING])
+	on_change (a_action: PROCEDURE [STRING_32])
 			-- Set action for selection change.
 			-- Action receives the selected value.
 		require
@@ -205,7 +205,7 @@ feature -- Events
 			change_action := a_action
 		end
 
-	changed (a_action: PROCEDURE [STRING]): like Current
+	changed (a_action: PROCEDURE [STRING_32]): like Current
 			-- Fluent version of on_change.
 		require
 			action_attached: a_action /= Void
@@ -231,7 +231,7 @@ feature -- Theme
 
 feature {NONE} -- Implementation
 
-	change_action: detachable PROCEDURE [STRING]
+	change_action: detachable PROCEDURE [STRING_32]
 			-- Action to call on selection change.
 
 	on_selection_changed
@@ -241,7 +241,7 @@ feature {NONE} -- Implementation
 				act.call ([selected_value])
 			end
 			if is_instrumented then
-				notify_event (create {SV_EVENT}.make_state_change ("selection", "", selected_value))
+				notify_event (create {SV_EVENT}.make_state_change ({STRING_32} "selection", {STRING_32} "", selected_value))
 			end
 		end
 

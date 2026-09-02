@@ -168,17 +168,26 @@ feature -- Pane Management
 feature -- Split Position
 
 	set_split_position (a_position: INTEGER)
-			-- Set splitter position in pixels.
+			-- Set splitter position in pixels (clamped to valid bounds).
 		require
 			positive: a_position >= 0
+		local
+			l_pos: INTEGER
 		do
+			l_pos := a_position
 			if is_horizontal then
 				check attached ev_horizontal_split as h then
-					h.set_split_position (a_position)
+					l_pos := l_pos.max (h.minimum_split_position).min (h.maximum_split_position)
+					if h.minimum_split_position <= h.maximum_split_position then
+						h.set_split_position (l_pos)
+					end
 				end
 			else
 				check attached ev_vertical_split as v then
-					v.set_split_position (a_position)
+					l_pos := l_pos.max (v.minimum_split_position).min (v.maximum_split_position)
+					if v.minimum_split_position <= v.maximum_split_position then
+						v.set_split_position (l_pos)
+					end
 				end
 			end
 		end
@@ -210,11 +219,22 @@ feature -- Split Position
 
 	set_proportion (a_proportion: REAL_64)
 			-- Set split as proportion (0.0 to 1.0).
+			-- Applied on first resize when widget has actual dimensions.
 		require
 			valid_proportion: a_proportion >= 0.0 and a_proportion <= 1.0
 		do
 			proportion := a_proportion
-			-- Applied when widget is displayed
+			proportion_pending := True
+			-- Hook resize to apply when widget gets actual size
+			if is_horizontal then
+				check attached ev_horizontal_split as al_h then
+					al_h.resize_actions.extend (agent on_resize_apply_proportion)
+				end
+			else
+				check attached ev_vertical_split as al_v then
+					al_v.resize_actions.extend (agent on_resize_apply_proportion)
+				end
+			end
 		end
 
 	proportion: REAL_64
@@ -229,6 +249,56 @@ feature -- Split Position
 			Result := Current
 		ensure
 			result_is_current: Result = Current
+		end
+
+feature {NONE} -- Implementation
+
+	proportion_pending: BOOLEAN
+			-- Is there a proportion waiting to be applied?
+
+	on_resize_apply_proportion (a_x, a_y, a_width, a_height: INTEGER)
+			-- Apply stored proportion on first resize with actual dimensions.
+			-- Clamps position to valid bounds to avoid precondition violations.
+		local
+			l_size: INTEGER
+			l_pos: INTEGER
+			l_min: INTEGER
+			l_max: INTEGER
+		do
+			if proportion_pending and proportion > 0.0 then
+				if is_horizontal then
+					l_size := a_width
+				else
+					l_size := a_height
+				end
+				if l_size > 10 then
+					l_pos := (l_size * proportion).truncated_to_integer
+					-- Clamp to valid bounds
+					if is_horizontal then
+						check attached ev_horizontal_split as al_h then
+							l_min := al_h.minimum_split_position
+							l_max := al_h.maximum_split_position
+							l_pos := l_pos.max (l_min).min (l_max)
+							if l_min <= l_max then
+								al_h.set_split_position (l_pos)
+							end
+							proportion_pending := False
+							al_h.resize_actions.prune_all (agent on_resize_apply_proportion)
+						end
+					else
+						check attached ev_vertical_split as al_v then
+							l_min := al_v.minimum_split_position
+							l_max := al_v.maximum_split_position
+							l_pos := l_pos.max (l_min).min (l_max)
+							if l_min <= l_max then
+								al_v.set_split_position (l_pos)
+							end
+							proportion_pending := False
+							al_v.resize_actions.prune_all (agent on_resize_apply_proportion)
+						end
+					end
+				end
+			end
 		end
 
 invariant

@@ -15,14 +15,14 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_label: STRING)
+	make (a_label: READABLE_STRING_GENERAL)
 			-- Create toolbar button with label.
 		require
 			label_not_empty: not a_label.is_empty
 		do
-			create ev_tool_bar_button.make_with_text (a_label)
+			create ev_tool_bar_button.make_with_text (a_label.to_string_32)
 		ensure
-			label_set: label.same_string (a_label)
+			label_set: label.same_string_general (a_label)
 		end
 
 feature -- Access
@@ -38,27 +38,27 @@ feature -- Access
 
 feature -- Label
 
-	set_label (a_label: STRING)
+	set_label (a_label: READABLE_STRING_GENERAL)
 			-- Set button label.
 		require
 			label_not_empty: not a_label.is_empty
 		do
-			ev_tool_bar_button.set_text (a_label)
+			ev_tool_bar_button.set_text (a_label.to_string_32)
 		ensure
-			label_set: label.same_string (a_label)
+			label_set: label.same_string_general (a_label)
 		end
 
 feature -- Tooltip
 
-	set_tooltip (a_text: STRING)
+	set_tooltip (a_text: READABLE_STRING_GENERAL)
 			-- Set tooltip text.
 		require
 			text_not_empty: not a_text.is_empty
 		do
-			ev_tool_bar_button.set_tooltip (a_text)
+			ev_tool_bar_button.set_tooltip (a_text.to_string_32)
 		end
 
-	tooltip (a_text: STRING): like Current
+	tooltip (a_text: READABLE_STRING_GENERAL): like Current
 			-- Set tooltip (fluent).
 		require
 			text_not_empty: not a_text.is_empty

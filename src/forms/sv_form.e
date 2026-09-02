@@ -22,9 +22,9 @@ feature {NONE} -- Initialization
 			create field_order.make (10)
 			create groups.make (5)
 			create errors.make (10)
-			create submit_actions.make
-			create error_actions.make
-			create change_actions.make
+			create submit_actions
+			create error_actions
+			create change_actions
 		end
 
 feature -- Structure

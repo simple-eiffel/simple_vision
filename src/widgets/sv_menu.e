@@ -15,15 +15,15 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_title: STRING)
+	make (a_title: READABLE_STRING_GENERAL)
 			-- Create menu with title.
 		require
 			title_not_empty: not a_title.is_empty
 		do
-			create ev_menu.make_with_text (a_title)
+			create ev_menu.make_with_text (a_title.to_string_32)
 			create items.make (10)
 		ensure
-			title_set: title.same_string (a_title)
+			title_set: title.same_string_general (a_title)
 		end
 
 feature -- Access
@@ -59,7 +59,7 @@ feature -- Item Management
 			added: count = old count + 1
 		end
 
-	item (a_label: STRING): SV_MENU_ITEM
+	item (a_label: READABLE_STRING_GENERAL): SV_MENU_ITEM
 			-- Create and add a menu item (fluent).
 		require
 			label_not_empty: not a_label.is_empty
@@ -70,7 +70,7 @@ feature -- Item Management
 			added: count = old count + 1
 		end
 
-	item_with_action (a_label: STRING; a_action: PROCEDURE): SV_MENU_ITEM
+	item_with_action (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): SV_MENU_ITEM
 			-- Create and add a menu item with action.
 		require
 			label_not_empty: not a_label.is_empty

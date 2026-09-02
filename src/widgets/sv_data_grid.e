@@ -33,7 +33,7 @@ feature {NONE} -- Initialization
 			subscribe_to_theme
 		end
 
-	make_with_columns (a_columns: ARRAY [STRING])
+	make_with_columns (a_columns: ARRAY [READABLE_STRING_GENERAL])
 			-- Create grid with column headers.
 		require
 			columns_attached: a_columns /= Void
@@ -51,10 +51,10 @@ feature -- Access
 	ev_widget: EV_WIDGET
 			-- Widget for container operations.
 
-	column_titles: ARRAYED_LIST [STRING]
+	column_titles: ARRAYED_LIST [STRING_32]
 			-- Column header titles.
 
-	row_data: ARRAYED_LIST [ARRAY [STRING]]
+	row_data: ARRAYED_LIST [ARRAY [STRING_32]]
 			-- Cached row data for sorting.
 
 	column_count: INTEGER
@@ -98,7 +98,7 @@ feature -- Access
 	is_striped: BOOLEAN
 			-- Is zebra striping enabled?
 
-	cell_value (a_row, a_column: INTEGER): STRING
+	cell_value (a_row, a_column: INTEGER): STRING_32
 			-- Get cell value as string.
 		require
 			valid_row: a_row >= 1 and a_row <= row_count
@@ -108,16 +108,16 @@ feature -- Access
 		do
 			l_item := ev_grid.item (a_column, a_row)
 			if attached {EV_GRID_LABEL_ITEM} l_item as lbl then
-				Result := lbl.text.to_string_8
+				Result := lbl.text
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
 feature -- Configuration
 
-	set_columns (a_columns: ARRAY [STRING])
-			-- Set column headers.
+	set_columns (a_columns: ARRAY [READABLE_STRING_GENERAL])
+			-- Set column headers and ensure header row is visible.
 		require
 			columns_attached: a_columns /= Void
 			columns_not_empty: not a_columns.is_empty
@@ -128,11 +128,12 @@ feature -- Configuration
 			column_titles.wipe_out
 			ev_grid.set_column_count_to (a_columns.count)
 			from i := 1 until i > a_columns.count loop
-				column_titles.extend (a_columns [i])
+				column_titles.extend (a_columns [i].to_string_32)
 				l_col := ev_grid.column (i)
-				l_col.set_title (a_columns [i])
+				l_col.set_title (a_columns [i].to_string_32)
 				i := i + 1
 			end
+			ev_grid.show_header
 		end
 
 	set_column_width (a_column, a_width: INTEGER)
@@ -142,6 +143,33 @@ feature -- Configuration
 			positive_width: a_width > 0
 		do
 			ev_grid.column (a_column).set_width (a_width)
+		end
+
+	set_column_minimum_width (a_column, a_width: INTEGER)
+			-- Set minimum width of specific column header (prevents collapse).
+		require
+			valid_column: a_column >= 1 and a_column <= column_count
+			positive_width: a_width > 0
+		do
+			ev_grid.column (a_column).header_item.set_minimum_width (a_width)
+		end
+
+	auto_size_columns
+			-- Resize all columns to fit their content, respecting minimum widths.
+			-- Each column is sized to the widest cell content or header, whichever is larger.
+		local
+			i: INTEGER
+			l_col: EV_GRID_COLUMN
+		do
+			if column_count > 0 and row_count > 0 then
+				from i := 1 until i > column_count loop
+					l_col := ev_grid.column (i)
+					if l_col.is_show_requested then
+						l_col.resize_to_content
+					end
+					i := i + 1
+				end
+			end
 		end
 
 	set_row_height (a_height: INTEGER)
@@ -178,7 +206,7 @@ feature -- Configuration
 
 feature -- Fluent Configuration
 
-	columns (a_columns: ARRAY [STRING]): like Current
+	columns (a_columns: ARRAY [READABLE_STRING_GENERAL]): like Current
 			-- Set columns (fluent).
 		require
 			columns_attached: a_columns /= Void
@@ -222,7 +250,7 @@ feature -- Fluent Configuration
 
 feature -- Data Management
 
-	add_row (a_values: ARRAY [STRING])
+	add_row (a_values: ARRAY [READABLE_STRING_GENERAL])
 			-- Add a row of data.
 		require
 			values_attached: a_values /= Void
@@ -231,14 +259,21 @@ feature -- Data Management
 			i: INTEGER
 			l_row: EV_GRID_ROW
 			l_item: EV_GRID_LABEL_ITEM
+			l_stored: ARRAY [STRING_32]
 		do
-			-- Cache for sorting
-			row_data.extend (a_values)
+			-- Cache as STRING_32 for sorting
+			create l_stored.make_filled ({STRING_32} "", 1, a_values.count)
+			from i := a_values.lower until i > a_values.upper loop
+				l_stored [i] := a_values [i].to_string_32
+				i := i + 1
+			end
+			row_data.extend (l_stored)
 			-- Add to grid
 			ev_grid.insert_new_row (row_count + 1)
 			l_row := ev_grid.row (row_count)
 			from i := 1 until i > a_values.count loop
-				create l_item.make_with_text (a_values [i])
+				create l_item.make_with_text (a_values [i].to_string_32)
+				l_item.set_font (theme.scaled_font)
 				l_row.set_item (i, l_item)
 				i := i + 1
 			end
@@ -248,7 +283,7 @@ feature -- Data Management
 			end
 		end
 
-	set_cell (a_row, a_column: INTEGER; a_value: STRING)
+	set_cell (a_row, a_column: INTEGER; a_value: READABLE_STRING_GENERAL)
 			-- Set cell value.
 		require
 			valid_row: a_row >= 1 and a_row <= row_count
@@ -257,11 +292,12 @@ feature -- Data Management
 		local
 			l_item: EV_GRID_LABEL_ITEM
 		do
-			create l_item.make_with_text (a_value)
+			create l_item.make_with_text (a_value.to_string_32)
+			l_item.set_font (theme.scaled_font)
 			ev_grid.row (a_row).set_item (a_column, l_item)
 		end
 
-	rows (a_data: ARRAY [ARRAY [STRING]]): like Current
+	rows (a_data: ARRAY [ARRAY [READABLE_STRING_GENERAL]]): like Current
 			-- Set all row data (fluent).
 		require
 			data_attached: a_data /= Void
@@ -447,7 +483,7 @@ feature {NONE} -- Implementation
 	refresh_with_sort
 			-- Redisplay data with current sort order.
 		local
-			l_sorted: ARRAYED_LIST [ARRAY [STRING]]
+			l_sorted: ARRAYED_LIST [ARRAY [STRING_32]]
 			i: INTEGER
 		do
 			if sort_direction = Sort_none or row_data.is_empty then
@@ -465,11 +501,11 @@ feature {NONE} -- Implementation
 			apply_row_colors
 		end
 
-	sorted_data: ARRAYED_LIST [ARRAY [STRING]]
+	sorted_data: ARRAYED_LIST [ARRAY [STRING_32]]
 			-- Return row_data sorted by current column and direction.
 		local
-			l_result: ARRAYED_LIST [ARRAY [STRING]]
-			l_sorter: SIMPLE_SORTER [ARRAY [STRING]]
+			l_result: ARRAYED_LIST [ARRAY [STRING_32]]
+			l_sorter: SIMPLE_SORTER [ARRAY [STRING_32]]
 			l_col: INTEGER
 		do
 			create l_result.make_from_iterable (row_data)
@@ -483,13 +519,13 @@ feature {NONE} -- Implementation
 			Result := l_result
 		end
 
-	row_column_key (a_row: ARRAY [STRING]; a_col: INTEGER): STRING
+	row_column_key (a_row: ARRAY [STRING_32]; a_col: INTEGER): STRING_32
 			-- Extract column value for sorting.
 		do
 			Result := a_row [a_col]
 		end
 
-	add_row_internal (a_values: ARRAY [STRING])
+	add_row_internal (a_values: ARRAY [STRING_32])
 			-- Add row without caching (used during sort refresh).
 		local
 			i: INTEGER
@@ -500,27 +536,30 @@ feature {NONE} -- Implementation
 			l_row := ev_grid.row (ev_grid.row_count)
 			from i := 1 until i > a_values.count loop
 				create l_item.make_with_text (a_values [i])
+				l_item.set_font (theme.scaled_font)
 				l_row.set_item (i, l_item)
 				i := i + 1
 			end
 		end
 
 	update_header_titles
-			-- Update column titles with sort indicators.
+			-- Update column titles with sort direction indicators.
 		local
 			i: INTEGER
-			l_title: STRING
+			l_title: STRING_32
 		do
 			from i := 1 until i > column_count loop
 				l_title := column_titles [i].twin
 				if i = sort_column then
 					inspect sort_direction
 					when Sort_ascending then
-						l_title.append (" [ASC]")
+						l_title.append_character (' ')
+						l_title.append_code ({NATURAL_32} 0x25B2)  -- ▲
 					when Sort_descending then
-						l_title.append (" [DESC]")
+						l_title.append_character (' ')
+						l_title.append_code ({NATURAL_32} 0x25BC)  -- ▼
 					else
-						-- No indicator
+						-- No indicator (natural order)
 					end
 				end
 				ev_grid.column (i).set_title (l_title)

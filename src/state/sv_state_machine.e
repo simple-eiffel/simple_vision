@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 			create states.make (10)
 			create transitions.make (20)
 			create transition_history.make (50)
-			create state_change_actions.make
+			create state_change_actions
 		ensure
 			name_set: name.same_string (a_name)
 		end

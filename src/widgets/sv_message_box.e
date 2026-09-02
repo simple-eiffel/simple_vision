@@ -19,54 +19,54 @@ create
 
 feature {NONE} -- Initialization
 
-	make_info (a_message: STRING)
+	make_info (a_message: READABLE_STRING_GENERAL)
 			-- Create information dialog.
 		require
 			message_not_empty: not a_message.is_empty
 		do
-			create ev_info_dialog.make_with_text (a_message)
+			create ev_info_dialog.make_with_text (a_message.to_string_32)
 			dialog_type := Type_info
-			message := a_message
+			message := a_message.to_string_32
 		end
 
-	make_warning (a_message: STRING)
+	make_warning (a_message: READABLE_STRING_GENERAL)
 			-- Create warning dialog.
 		require
 			message_not_empty: not a_message.is_empty
 		do
-			create ev_warning_dialog.make_with_text (a_message)
+			create ev_warning_dialog.make_with_text (a_message.to_string_32)
 			dialog_type := Type_warning
-			message := a_message
+			message := a_message.to_string_32
 		end
 
-	make_error (a_message: STRING)
+	make_error (a_message: READABLE_STRING_GENERAL)
 			-- Create error dialog.
 		require
 			message_not_empty: not a_message.is_empty
 		do
-			create ev_error_dialog.make_with_text (a_message)
+			create ev_error_dialog.make_with_text (a_message.to_string_32)
 			dialog_type := Type_error
-			message := a_message
+			message := a_message.to_string_32
 		end
 
-	make_question (a_message: STRING)
+	make_question (a_message: READABLE_STRING_GENERAL)
 			-- Create question dialog (Yes/No).
 		require
 			message_not_empty: not a_message.is_empty
 		do
-			create ev_question_dialog.make_with_text (a_message)
+			create ev_question_dialog.make_with_text (a_message.to_string_32)
 			dialog_type := Type_question
-			message := a_message
+			message := a_message.to_string_32
 		end
 
-	make_confirm (a_message: STRING)
+	make_confirm (a_message: READABLE_STRING_GENERAL)
 			-- Create confirmation dialog (OK/Cancel).
 		require
 			message_not_empty: not a_message.is_empty
 		do
-			create ev_confirm_dialog.make_with_text (a_message)
+			create ev_confirm_dialog.make_with_text (a_message.to_string_32)
 			dialog_type := Type_confirm
-			message := a_message
+			message := a_message.to_string_32
 		end
 
 feature -- Access
@@ -80,7 +80,7 @@ feature -- Access
 	dialog_type: INTEGER
 			-- Type of dialog.
 
-	message: STRING
+	message: STRING_32
 			-- Dialog message.
 
 	Type_info: INTEGER = 1
@@ -111,26 +111,26 @@ feature -- Result
 
 feature -- Configuration
 
-	set_title (a_title: STRING)
+	set_title (a_title: READABLE_STRING_GENERAL)
 			-- Set dialog title.
 		require
 			title_not_empty: not a_title.is_empty
 		do
 			inspect dialog_type
 			when Type_info then
-				check attached ev_info_dialog as d then d.set_title (a_title) end
+				check attached ev_info_dialog as d then d.set_title (a_title.to_string_32) end
 			when Type_warning then
-				check attached ev_warning_dialog as d then d.set_title (a_title) end
+				check attached ev_warning_dialog as d then d.set_title (a_title.to_string_32) end
 			when Type_error then
-				check attached ev_error_dialog as d then d.set_title (a_title) end
+				check attached ev_error_dialog as d then d.set_title (a_title.to_string_32) end
 			when Type_question then
-				check attached ev_question_dialog as d then d.set_title (a_title) end
+				check attached ev_question_dialog as d then d.set_title (a_title.to_string_32) end
 			when Type_confirm then
-				check attached ev_confirm_dialog as d then d.set_title (a_title) end
+				check attached ev_confirm_dialog as d then d.set_title (a_title.to_string_32) end
 			end
 		end
 
-	title (a_title: STRING): like Current
+	title (a_title: READABLE_STRING_GENERAL): like Current
 			-- Set title (fluent).
 		require
 			title_not_empty: not a_title.is_empty
@@ -180,7 +180,7 @@ feature -- Display
 
 feature -- Convenience (class-level would be better but requires once)
 
-	show_info (a_parent: SV_WINDOW; a_message: STRING)
+	show_info (a_parent: SV_WINDOW; a_message: READABLE_STRING_GENERAL)
 			-- Show info message.
 		require
 			parent_attached: a_parent /= Void
@@ -188,11 +188,11 @@ feature -- Convenience (class-level would be better but requires once)
 		local
 			l_dialog: EV_INFORMATION_DIALOG
 		do
-			create l_dialog.make_with_text (a_message)
+			create l_dialog.make_with_text (a_message.to_string_32)
 			l_dialog.show_modal_to_window (a_parent.ev_titled_window)
 		end
 
-	show_warning (a_parent: SV_WINDOW; a_message: STRING)
+	show_warning (a_parent: SV_WINDOW; a_message: READABLE_STRING_GENERAL)
 			-- Show warning message.
 		require
 			parent_attached: a_parent /= Void
@@ -200,11 +200,11 @@ feature -- Convenience (class-level would be better but requires once)
 		local
 			l_dialog: EV_WARNING_DIALOG
 		do
-			create l_dialog.make_with_text (a_message)
+			create l_dialog.make_with_text (a_message.to_string_32)
 			l_dialog.show_modal_to_window (a_parent.ev_titled_window)
 		end
 
-	show_error (a_parent: SV_WINDOW; a_message: STRING)
+	show_error (a_parent: SV_WINDOW; a_message: READABLE_STRING_GENERAL)
 			-- Show error message.
 		require
 			parent_attached: a_parent /= Void
@@ -212,11 +212,11 @@ feature -- Convenience (class-level would be better but requires once)
 		local
 			l_dialog: EV_ERROR_DIALOG
 		do
-			create l_dialog.make_with_text (a_message)
+			create l_dialog.make_with_text (a_message.to_string_32)
 			l_dialog.show_modal_to_window (a_parent.ev_titled_window)
 		end
 
-	ask_yes_no (a_parent: SV_WINDOW; a_message: STRING): BOOLEAN
+	ask_yes_no (a_parent: SV_WINDOW; a_message: READABLE_STRING_GENERAL): BOOLEAN
 			-- Ask yes/no question, return True if Yes.
 		require
 			parent_attached: a_parent /= Void
@@ -224,14 +224,14 @@ feature -- Convenience (class-level would be better but requires once)
 		local
 			l_dialog: EV_QUESTION_DIALOG
 		do
-			create l_dialog.make_with_text (a_message)
+			create l_dialog.make_with_text (a_message.to_string_32)
 			l_dialog.show_modal_to_window (a_parent.ev_titled_window)
 			if attached l_dialog.selected_button as btn then
 				Result := btn.same_string (l_dialog.ev_yes)
 			end
 		end
 
-	ask_ok_cancel (a_parent: SV_WINDOW; a_message: STRING): BOOLEAN
+	ask_ok_cancel (a_parent: SV_WINDOW; a_message: READABLE_STRING_GENERAL): BOOLEAN
 			-- Ask OK/Cancel, return True if OK.
 		require
 			parent_attached: a_parent /= Void
@@ -239,7 +239,7 @@ feature -- Convenience (class-level would be better but requires once)
 		local
 			l_dialog: EV_CONFIRMATION_DIALOG
 		do
-			create l_dialog.make_with_text (a_message)
+			create l_dialog.make_with_text (a_message.to_string_32)
 			l_dialog.show_modal_to_window (a_parent.ev_titled_window)
 			if attached l_dialog.selected_button as btn then
 				Result := btn.same_string (l_dialog.ev_ok)

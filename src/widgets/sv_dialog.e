@@ -27,13 +27,13 @@ feature {NONE} -- Initialization
 			create ev_dialog
 		end
 
-	make_with_title (a_title: STRING)
+	make_with_title (a_title: READABLE_STRING_GENERAL)
 			-- Create dialog with title.
 		require
 			title_not_empty: not a_title.is_empty
 		do
 			create ev_dialog
-			ev_dialog.set_title (a_title)
+			ev_dialog.set_title (a_title.to_string_32)
 		end
 
 feature -- Access
@@ -55,15 +55,15 @@ feature -- Access
 
 feature -- Title
 
-	set_title (a_title: STRING)
+	set_title (a_title: READABLE_STRING_GENERAL)
 			-- Set dialog title.
 		require
 			title_not_empty: not a_title.is_empty
 		do
-			ev_dialog.set_title (a_title)
+			ev_dialog.set_title (a_title.to_string_32)
 		end
 
-	titled (a_title: STRING): like Current
+	titled (a_title: READABLE_STRING_GENERAL): like Current
 			-- Set title (fluent).
 		require
 			title_not_empty: not a_title.is_empty

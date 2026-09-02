@@ -15,14 +15,14 @@ create
 
 feature {NONE} -- Initialization
 
-	make (a_label: STRING)
+	make (a_label: READABLE_STRING_GENERAL)
 			-- Create menu item with label.
 		require
 			label_not_empty: not a_label.is_empty
 		do
-			create ev_menu_item.make_with_text (a_label)
+			create ev_menu_item.make_with_text (a_label.to_string_32)
 		ensure
-			label_set: label.same_string (a_label)
+			label_set: label.same_string_general (a_label)
 		end
 
 feature -- Access
@@ -38,14 +38,14 @@ feature -- Access
 
 feature -- Label
 
-	set_label (a_label: STRING)
+	set_label (a_label: READABLE_STRING_GENERAL)
 			-- Set item label.
 		require
 			label_not_empty: not a_label.is_empty
 		do
-			ev_menu_item.set_text (a_label)
+			ev_menu_item.set_text (a_label.to_string_32)
 		ensure
-			label_set: label.same_string (a_label)
+			label_set: label.same_string_general (a_label)
 		end
 
 feature -- State

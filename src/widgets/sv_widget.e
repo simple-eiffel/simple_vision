@@ -317,6 +317,29 @@ feature -- Sizing
 			result_is_current: Result = Current
 		end
 
+feature -- Tooltip
+
+	set_tooltip (a_text: READABLE_STRING_GENERAL)
+			-- Set tooltip text on this widget.
+		require
+			text_not_void: a_text /= Void
+		do
+			if attached {EV_TOOLTIPABLE} ev_widget as l_tip then
+				l_tip.set_tooltip (a_text.to_string_32)
+			end
+		end
+
+	tooltip (a_text: READABLE_STRING_GENERAL): like Current
+			-- Set tooltip text (fluent).
+		require
+			text_not_void: a_text /= Void
+		do
+			set_tooltip (a_text)
+			Result := Current
+		ensure
+			result_is_current: Result = Current
+		end
+
 feature -- Focus
 
 	set_focus: like Current

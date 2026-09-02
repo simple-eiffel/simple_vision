@@ -101,29 +101,6 @@ feature -- Events
 			result_is_current: Result = Current
 		end
 
-feature -- Tooltip
-
-	set_tooltip (a_text: READABLE_STRING_GENERAL): like Current
-			-- Set button tooltip.
-		require
-			text_not_void: a_text /= Void
-		do
-			ev_button.set_tooltip (a_text.to_string_32)
-			Result := Current
-		ensure
-			result_is_current: Result = Current
-		end
-
-	tooltip (a_text: READABLE_STRING_GENERAL): like Current
-			-- Fluent alias for set_tooltip.
-		require
-			text_not_void: a_text /= Void
-		do
-			Result := set_tooltip (a_text)
-		ensure
-			result_is_current: Result = Current
-		end
-
 feature -- Default Button
 
 	set_default: like Current

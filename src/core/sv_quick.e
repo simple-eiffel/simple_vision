@@ -90,6 +90,24 @@ feature -- Basic Widgets
 			result_attached: Result /= Void
 		end
 
+	text_area: SV_TEXT_AREA
+			-- Create a multi-line read-only text area with word wrapping and scrollbars.
+		do
+			create Result.make
+		ensure
+			result_attached: Result /= Void
+		end
+
+	text_area_with (a_content: READABLE_STRING_GENERAL): SV_TEXT_AREA
+			-- Create a multi-line read-only text area with initial content.
+		require
+			content_not_void: a_content /= Void
+		do
+			create Result.make_with_text (a_content)
+		ensure
+			result_attached: Result /= Void
+		end
+
 	button (a_label: READABLE_STRING_GENERAL): SV_BUTTON
 			-- Create a button.
 		require
@@ -148,7 +166,7 @@ feature -- Selection Widgets
 			result_attached: Result /= Void
 		end
 
-	radios (a_options: ARRAY [STRING]): SV_RADIO_GROUP
+	radios (a_options: ARRAY [READABLE_STRING_GENERAL]): SV_RADIO_GROUP
 			-- Create radio group with options.
 		require
 			options_attached: a_options /= Void
@@ -167,7 +185,7 @@ feature -- Selection Widgets
 			result_attached: Result /= Void
 		end
 
-	dropdown_with (a_options: ARRAY [STRING]): SV_DROPDOWN
+	dropdown_with (a_options: ARRAY [READABLE_STRING_GENERAL]): SV_DROPDOWN
 			-- Create dropdown with options.
 		require
 			options_attached: a_options /= Void
@@ -193,7 +211,7 @@ feature -- Selection Widgets
 			result_attached: Result /= Void
 		end
 
-	list_with (a_items: ARRAY [STRING]): SV_LIST
+	list_with (a_items: ARRAY [READABLE_STRING_GENERAL]): SV_LIST
 			-- Create list with items.
 		require
 			items_attached: a_items /= Void
@@ -325,7 +343,7 @@ feature -- Hierarchical Widgets
 			result_attached: Result /= Void
 		end
 
-	tree_with (a_roots: ARRAY [STRING]): SV_TREE
+	tree_with (a_roots: ARRAY [READABLE_STRING_GENERAL]): SV_TREE
 			-- Create tree with root items.
 		require
 			roots_attached: a_roots /= Void
@@ -346,7 +364,7 @@ feature -- Application Chrome
 			result_attached: Result /= Void
 		end
 
-	menu (a_title: STRING): SV_MENU
+	menu (a_title: READABLE_STRING_GENERAL): SV_MENU
 			-- Create a menu with title.
 		require
 			title_not_empty: not a_title.is_empty
@@ -356,7 +374,7 @@ feature -- Application Chrome
 			result_attached: Result /= Void
 		end
 
-	menu_item (a_label: STRING): SV_MENU_ITEM
+	menu_item (a_label: READABLE_STRING_GENERAL): SV_MENU_ITEM
 			-- Create a menu item.
 		require
 			label_not_empty: not a_label.is_empty
@@ -374,7 +392,7 @@ feature -- Application Chrome
 			result_attached: Result /= Void
 		end
 
-	toolbar_button (a_label: STRING): SV_TOOLBAR_BUTTON
+	toolbar_button (a_label: READABLE_STRING_GENERAL): SV_TOOLBAR_BUTTON
 			-- Create a toolbar button.
 		require
 			label_not_empty: not a_label.is_empty
@@ -392,7 +410,7 @@ feature -- Application Chrome
 			result_attached: Result /= Void
 		end
 
-	statusbar_with (a_text: STRING): SV_STATUSBAR
+	statusbar_with (a_text: READABLE_STRING_GENERAL): SV_STATUSBAR
 			-- Create status bar with initial text.
 		require
 			text_not_void: a_text /= Void
@@ -420,7 +438,7 @@ feature -- Dialogs
 			result_attached: Result /= Void
 		end
 
-	dialog_with_title (a_title: STRING): SV_DIALOG
+	dialog_with_title (a_title: READABLE_STRING_GENERAL): SV_DIALOG
 			-- Create dialog with title.
 		require
 			title_not_empty: not a_title.is_empty
@@ -498,7 +516,7 @@ feature -- Standard Dialogs (Phase 5)
 			result_attached: Result /= Void
 		end
 
-	info_box (a_message: STRING): SV_MESSAGE_BOX
+	info_box (a_message: READABLE_STRING_GENERAL): SV_MESSAGE_BOX
 			-- Create information message box.
 		require
 			message_not_empty: not a_message.is_empty
@@ -508,7 +526,7 @@ feature -- Standard Dialogs (Phase 5)
 			result_attached: Result /= Void
 		end
 
-	warning_box (a_message: STRING): SV_MESSAGE_BOX
+	warning_box (a_message: READABLE_STRING_GENERAL): SV_MESSAGE_BOX
 			-- Create warning message box.
 		require
 			message_not_empty: not a_message.is_empty
@@ -518,7 +536,7 @@ feature -- Standard Dialogs (Phase 5)
 			result_attached: Result /= Void
 		end
 
-	error_box (a_message: STRING): SV_MESSAGE_BOX
+	error_box (a_message: READABLE_STRING_GENERAL): SV_MESSAGE_BOX
 			-- Create error message box.
 		require
 			message_not_empty: not a_message.is_empty
@@ -528,7 +546,7 @@ feature -- Standard Dialogs (Phase 5)
 			result_attached: Result /= Void
 		end
 
-	question_box (a_message: STRING): SV_MESSAGE_BOX
+	question_box (a_message: READABLE_STRING_GENERAL): SV_MESSAGE_BOX
 			-- Create yes/no question dialog.
 		require
 			message_not_empty: not a_message.is_empty
@@ -538,7 +556,7 @@ feature -- Standard Dialogs (Phase 5)
 			result_attached: Result /= Void
 		end
 
-	confirm_box (a_message: STRING): SV_MESSAGE_BOX
+	confirm_box (a_message: READABLE_STRING_GENERAL): SV_MESSAGE_BOX
 			-- Create OK/Cancel confirmation dialog.
 		require
 			message_not_empty: not a_message.is_empty
@@ -736,7 +754,7 @@ feature -- Phase 4 Additions (Data)
 			result_attached: Result /= Void
 		end
 
-	data_grid_with (a_columns: ARRAY [STRING]): SV_DATA_GRID
+	data_grid_with (a_columns: ARRAY [READABLE_STRING_GENERAL]): SV_DATA_GRID
 			-- Create data grid with columns.
 		require
 			columns_attached: a_columns /= Void

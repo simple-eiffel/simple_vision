@@ -28,14 +28,14 @@ feature {NONE} -- Initialization
 			subscribe_to_theme
 		end
 
-	make_with_options (a_options: ARRAY [STRING])
+	make_with_options (a_options: ARRAY [READABLE_STRING_GENERAL])
 			-- Create dropdown with options.
 		require
 			options_attached: a_options /= Void
 		do
 			make
-			across a_options as opt loop
-				add_option (opt.item)
+			across a_options as ic_opt loop
+				add_option (ic_opt.item)
 			end
 		end
 
@@ -50,34 +50,34 @@ feature -- Access
 			Result := ev_combo_box
 		end
 
-	option_values: ARRAYED_LIST [STRING]
+	option_values: ARRAYED_LIST [STRING_32]
 			-- Values associated with each option.
 
 	selected_index: INTEGER
 			-- Index of selected option (0 if none).
 		do
-			if attached ev_combo_box.selected_item as item then
-				Result := ev_combo_box.index_of (item, 1)
+			if attached ev_combo_box.selected_item as al_item then
+				Result := ev_combo_box.index_of (al_item, 1)
 			end
 		end
 
 	selected_text: STRING_32
 			-- Text of selected option.
 		do
-			if attached ev_combo_box.selected_item as item then
-				Result := item.text
+			if attached ev_combo_box.selected_item as al_item then
+				Result := al_item.text
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
-	selected_value: STRING
+	selected_value: STRING_32
 			-- Value of selected option.
 		do
 			if selected_index > 0 and selected_index <= option_values.count then
 				Result := option_values [selected_index]
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
@@ -89,21 +89,21 @@ feature -- Access
 
 feature -- Options
 
-	add_option (a_text: STRING)
+	add_option (a_text: READABLE_STRING_GENERAL)
 			-- Add an option.
 		require
 			text_not_empty: not a_text.is_empty
 		local
 			l_item: EV_LIST_ITEM
 		do
-			create l_item.make_with_text (a_text)
+			create l_item.make_with_text (a_text.to_string_32)
 			ev_combo_box.extend (l_item)
-			option_values.extend (a_text)
+			option_values.extend (a_text.to_string_32)
 		ensure
 			added: ev_combo_box.count = old ev_combo_box.count + 1
 		end
 
-	add_option_with_value (a_text, a_value: STRING)
+	add_option_with_value (a_text, a_value: READABLE_STRING_GENERAL)
 			-- Add option with separate display text and value.
 		require
 			text_not_empty: not a_text.is_empty
@@ -111,18 +111,18 @@ feature -- Options
 		local
 			l_item: EV_LIST_ITEM
 		do
-			create l_item.make_with_text (a_text)
+			create l_item.make_with_text (a_text.to_string_32)
 			ev_combo_box.extend (l_item)
-			option_values.extend (a_value)
+			option_values.extend (a_value.to_string_32)
 		end
 
-	options (a_options: ARRAY [STRING]): like Current
+	options (a_options: ARRAY [READABLE_STRING_GENERAL]): like Current
 			-- Add multiple options (fluent).
 		require
 			options_attached: a_options /= Void
 		do
-			across a_options as opt loop
-				add_option (opt.item)
+			across a_options as ic_opt loop
+				add_option (ic_opt.item)
 			end
 			Result := Current
 		ensure
@@ -151,7 +151,7 @@ feature -- Selection
 			selected: selected_index = a_index
 		end
 
-	select_value (a_value: STRING)
+	select_value (a_value: READABLE_STRING_GENERAL)
 			-- Select option by value.
 		require
 			value_not_empty: not a_value.is_empty
@@ -159,7 +159,7 @@ feature -- Selection
 			i: INTEGER
 		do
 			from i := 1 until i > option_values.count loop
-				if option_values [i].same_string (a_value) then
+				if option_values [i].same_string_general (a_value) then
 					select_index (i)
 				end
 				i := i + 1

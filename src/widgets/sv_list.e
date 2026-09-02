@@ -1,5 +1,5 @@
 note
-	description: "List widget - wraps EV_LIST"
+	description: "List widget - backed by EV_GRID for font support"
 	author: "Larry Rix"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -9,6 +9,9 @@ class
 
 inherit
 	SV_WIDGET
+		redefine
+			apply_theme
+		end
 
 create
 	make,
@@ -19,45 +22,55 @@ feature {NONE} -- Initialization
 	make
 			-- Create empty list.
 		do
-			create ev_list
+			create ev_grid
+			ev_grid.set_column_count_to (1)
+			ev_grid.hide_header
+			ev_grid.enable_single_row_selection
+			ev_grid.enable_always_selected
+			ev_grid.set_focused_selection_color (create {EV_COLOR}.make_with_8_bit_rgb (200, 200, 240))
+			ev_grid.set_focused_selection_text_color (create {EV_COLOR}.make_with_8_bit_rgb (0, 0, 0))
+			ev_grid.set_non_focused_selection_color (create {EV_COLOR}.make_with_8_bit_rgb (220, 220, 220))
+			ev_grid.set_non_focused_selection_text_color (create {EV_COLOR}.make_with_8_bit_rgb (0, 0, 0))
 			create item_values.make (20)
+			apply_theme
+			subscribe_to_theme
 		end
 
-	make_with_items (a_items: ARRAY [STRING])
+	make_with_items (a_items: ARRAY [READABLE_STRING_GENERAL])
 			-- Create list with items.
 		require
 			items_attached: a_items /= Void
 		do
 			make
-			across a_items as item loop
-				add_item (item.item)
+			across a_items as ic_item loop
+				add_item (ic_item.item)
 			end
 		end
 
 feature -- Access
 
-	ev_list: EV_LIST
-			-- Underlying EiffelVision-2 list.
+	ev_grid: EV_GRID
+			-- Underlying EiffelVision-2 grid (used instead of EV_LIST for font support).
 
 	ev_widget: EV_WIDGET
 			-- Implement SV_WIDGET requirement.
 		do
-			Result := ev_list
+			Result := ev_grid
 		end
 
-	item_values: ARRAYED_LIST [STRING]
+	item_values: ARRAYED_LIST [STRING_32]
 			-- Values associated with each item.
 
 	count: INTEGER
 			-- Number of items.
 		do
-			Result := ev_list.count
+			Result := ev_grid.row_count
 		end
 
 	is_empty: BOOLEAN
 			-- Is list empty?
 		do
-			Result := ev_list.is_empty
+			Result := ev_grid.row_count = 0
 		end
 
 feature -- Selection
@@ -65,73 +78,81 @@ feature -- Selection
 	selected_index: INTEGER
 			-- Index of selected item (0 if none).
 		do
-			if attached ev_list.selected_item as item then
-				Result := ev_list.index_of (item, 1)
+			if ev_grid.selected_rows.count > 0 then
+				Result := ev_grid.selected_rows.first.index
 			end
 		end
 
 	selected_text: STRING_32
 			-- Text of selected item.
 		do
-			if attached ev_list.selected_item as item then
-				Result := item.text
+			if ev_grid.selected_rows.count > 0 then
+				if attached {EV_GRID_LABEL_ITEM} ev_grid.selected_rows.first.item (1) as al_item then
+					Result := al_item.text
+				else
+					Result := {STRING_32} ""
+				end
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
-	selected_value: STRING
+	selected_value: STRING_32
 			-- Value of selected item.
 		do
 			if selected_index > 0 and selected_index <= item_values.count then
 				Result := item_values [selected_index]
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
 	has_selection: BOOLEAN
 			-- Is any item selected?
 		do
-			Result := ev_list.selected_item /= Void
+			Result := ev_grid.selected_rows.count > 0
 		end
 
 feature -- Items
 
-	add_item (a_text: STRING)
+	add_item (a_text: READABLE_STRING_GENERAL)
 			-- Add an item.
 		require
 			text_not_empty: not a_text.is_empty
 		local
-			l_item: EV_LIST_ITEM
+			l_item: EV_GRID_LABEL_ITEM
 		do
-			create l_item.make_with_text (a_text)
-			ev_list.extend (l_item)
-			item_values.extend (a_text)
+			ev_grid.insert_new_row (ev_grid.row_count + 1)
+			create l_item.make_with_text (a_text.to_string_32)
+			l_item.set_font (theme.scaled_font)
+			ev_grid.row (ev_grid.row_count).set_item (1, l_item)
+			item_values.extend (a_text.to_string_32)
 		ensure
 			added: count = old count + 1
 		end
 
-	add_item_with_value (a_text, a_value: STRING)
+	add_item_with_value (a_text, a_value: READABLE_STRING_GENERAL)
 			-- Add item with separate display text and value.
 		require
 			text_not_empty: not a_text.is_empty
 			value_not_empty: not a_value.is_empty
 		local
-			l_item: EV_LIST_ITEM
+			l_item: EV_GRID_LABEL_ITEM
 		do
-			create l_item.make_with_text (a_text)
-			ev_list.extend (l_item)
-			item_values.extend (a_value)
+			ev_grid.insert_new_row (ev_grid.row_count + 1)
+			create l_item.make_with_text (a_text.to_string_32)
+			l_item.set_font (theme.scaled_font)
+			ev_grid.row (ev_grid.row_count).set_item (1, l_item)
+			item_values.extend (a_value.to_string_32)
 		end
 
-	items (a_items: ARRAY [STRING]): like Current
+	items (a_items: ARRAY [READABLE_STRING_GENERAL]): like Current
 			-- Add multiple items (fluent).
 		require
 			items_attached: a_items /= Void
 		do
-			across a_items as item loop
-				add_item (item.item)
+			across a_items as ic_item loop
+				add_item (ic_item.item)
 			end
 			Result := Current
 		ensure
@@ -141,7 +162,8 @@ feature -- Items
 	clear
 			-- Remove all items.
 		do
-			ev_list.wipe_out
+			ev_grid.wipe_out
+			ev_grid.set_column_count_to (1)
 			item_values.wipe_out
 		ensure
 			empty: is_empty
@@ -151,13 +173,16 @@ feature -- Items
 			-- Remove selected item.
 		require
 			has_selection: has_selection
+		local
+			l_idx: INTEGER
 		do
-			if attached ev_list.selected_item as item then
-				if selected_index <= item_values.count then
-					item_values.go_i_th (selected_index)
+			l_idx := selected_index
+			if l_idx > 0 then
+				ev_grid.remove_row (l_idx)
+				if l_idx <= item_values.count then
+					item_values.go_i_th (l_idx)
 					item_values.remove
 				end
-				ev_list.prune (item)
 			end
 		end
 
@@ -168,13 +193,11 @@ feature -- Selection Operations
 		require
 			valid_index: a_index >= 1 and a_index <= count
 		do
-			ev_list.i_th (a_index).enable_select
+			ev_grid.row (a_index).enable_select
 			notify_selection_change
-		ensure
-			selected: selected_index = a_index
 		end
 
-	select_value (a_value: STRING)
+	select_value (a_value: READABLE_STRING_GENERAL)
 			-- Select item by value.
 		require
 			value_not_empty: not a_value.is_empty
@@ -182,7 +205,7 @@ feature -- Selection Operations
 			i: INTEGER
 		do
 			from i := 1 until i > item_values.count loop
-				if item_values [i].same_string (a_value) then
+				if item_values [i].same_string_general (a_value) then
 					select_index (i)
 				end
 				i := i + 1
@@ -200,7 +223,7 @@ feature -- Selection Operations
 	deselect_all
 			-- Clear selection.
 		do
-			ev_list.remove_selection
+			ev_grid.remove_selection
 		ensure
 			no_selection: not has_selection
 		end
@@ -221,7 +244,7 @@ feature -- Multiple Selection
 	enable_multiple_selection: like Current
 			-- Allow selecting multiple items.
 		do
-			ev_list.enable_multiple_selection
+			ev_grid.enable_multiple_row_selection
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -230,7 +253,7 @@ feature -- Multiple Selection
 	disable_multiple_selection: like Current
 			-- Only allow single selection.
 		do
-			ev_list.disable_multiple_selection
+			ev_grid.enable_single_row_selection
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -248,8 +271,8 @@ feature -- Multiple Selection
 			-- Indices of all selected items.
 		do
 			create Result.make (10)
-			across ev_list.selected_items as item loop
-				Result.extend (ev_list.index_of (item.item, 1))
+			across ev_grid.selected_rows as ic_row loop
+				Result.extend (ic_row.item.index)
 			end
 		end
 
@@ -260,7 +283,10 @@ feature -- Events
 		require
 			action_attached: a_action /= Void
 		do
-			ev_list.select_actions.extend (a_action)
+			ev_grid.row_select_actions.extend (agent (a_row: EV_GRID_ROW; act: PROCEDURE)
+				do
+					act.call (Void)
+				end (?, a_action))
 		end
 
 	on_deselect (a_action: PROCEDURE)
@@ -268,7 +294,10 @@ feature -- Events
 		require
 			action_attached: a_action /= Void
 		do
-			ev_list.deselect_actions.extend (a_action)
+			ev_grid.row_deselect_actions.extend (agent (a_row: EV_GRID_ROW; act: PROCEDURE)
+				do
+					act.call (Void)
+				end (?, a_action))
 		end
 
 	on_double_click (a_action: PROCEDURE)
@@ -276,7 +305,7 @@ feature -- Events
 		require
 			action_attached: a_action /= Void
 		do
-			ev_list.pointer_double_press_actions.extend (agent (x, y, b: INTEGER; xt, yt, p: REAL_64; sx, sy: INTEGER; act: PROCEDURE)
+			ev_grid.pointer_double_press_actions.extend (agent (x, y, b: INTEGER; xt, yt, p: REAL_64; sx, sy: INTEGER; act: PROCEDURE)
 				do
 					act.call (Void)
 				end (?, ?, ?, ?, ?, ?, ?, ?, a_action))
@@ -293,6 +322,24 @@ feature -- Events
 			result_is_current: Result = Current
 		end
 
+feature -- Theme
+
+	apply_theme
+			-- Apply theme colors and font to list.
+		local
+			i: INTEGER
+		do
+			ev_grid.set_foreground_color (tokens.text_primary.to_ev_color)
+			ev_grid.set_background_color (tokens.surface.to_ev_color)
+			-- Update font on all existing items
+			from i := 1 until i > ev_grid.row_count loop
+				if attached {EV_GRID_LABEL_ITEM} ev_grid.row (i).item (1) as al_item then
+					al_item.set_font (theme.scaled_font)
+				end
+				i := i + 1
+			end
+		end
+
 feature {NONE} -- Implementation
 
 	notify_selection_change
@@ -304,7 +351,7 @@ feature {NONE} -- Implementation
 		end
 
 invariant
-	ev_list_exists: ev_list /= Void
+	ev_grid_exists: ev_grid /= Void
 	item_values_exists: item_values /= Void
 
 end

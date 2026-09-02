@@ -40,10 +40,10 @@ feature {NONE} -- Initialization
 			make (Event_key, "code=" + a_key_code.out + ",text=" + a_text)
 		end
 
-	make_state_change (a_property, a_old_value, a_new_value: STRING)
+	make_state_change (a_property, a_old_value, a_new_value: READABLE_STRING_GENERAL)
 			-- Create state change event.
 		do
-			make (Event_state_change, a_property + ":" + a_old_value + "->" + a_new_value)
+			make (Event_state_change, a_property.out + ":" + a_old_value.out + "->" + a_new_value.out)
 		end
 
 feature -- Access

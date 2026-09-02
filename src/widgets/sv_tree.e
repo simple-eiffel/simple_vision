@@ -9,6 +9,9 @@ class
 
 inherit
 	SV_WIDGET
+		redefine
+			apply_theme
+		end
 
 create
 	make
@@ -21,6 +24,8 @@ feature {NONE} -- Initialization
 			create ev_tree
 			create nodes.make (20)
 			node_counter := 0
+			apply_theme
+			subscribe_to_theme
 		end
 
 feature -- Access
@@ -57,20 +62,20 @@ feature -- Selection
 	selected_text: STRING_32
 			-- Text of selected node.
 		do
-			if attached ev_tree.selected_item as node then
-				Result := node.text
+			if attached ev_tree.selected_item as al_node then
+				Result := al_node.text
 			else
-				Result := ""
+				Result := {STRING_32} ""
 			end
 		end
 
-	selected_value: STRING
+	selected_value: STRING_32
 			-- Value of selected node (stored in data field).
 		do
-			if attached ev_tree.selected_item as node and then attached {STRING} node.data as val then
-				Result := val
+			if attached ev_tree.selected_item as al_node and then attached {STRING_32} al_node.data as al_val then
+				Result := al_val
 			else
-				Result := selected_text.to_string_8
+				Result := selected_text
 			end
 		end
 
@@ -82,15 +87,16 @@ feature -- Selection
 
 feature -- Node Creation
 
-	add_root (a_text: STRING): INTEGER
+	add_root (a_text: READABLE_STRING_GENERAL): INTEGER
 			-- Add root-level node, return node ID for adding children.
 		require
 			text_not_empty: not a_text.is_empty
 		local
 			l_node: EV_TREE_ITEM
 		do
-			create l_node.make_with_text (a_text)
-			l_node.set_data (a_text)
+			create l_node.make_with_text (a_text.to_string_32)
+			l_node.set_data (a_text.to_string_32)
+
 			ev_tree.extend (l_node)
 			node_counter := node_counter + 1
 			nodes.put (l_node, node_counter)
@@ -100,7 +106,7 @@ feature -- Node Creation
 			valid_id: Result > 0
 		end
 
-	add_root_with_value (a_text, a_value: STRING): INTEGER
+	add_root_with_value (a_text, a_value: READABLE_STRING_GENERAL): INTEGER
 			-- Add root node with separate display text and value.
 		require
 			text_not_empty: not a_text.is_empty
@@ -108,15 +114,16 @@ feature -- Node Creation
 		local
 			l_node: EV_TREE_ITEM
 		do
-			create l_node.make_with_text (a_text)
-			l_node.set_data (a_value)
+			create l_node.make_with_text (a_text.to_string_32)
+			l_node.set_data (a_value.to_string_32)
+
 			ev_tree.extend (l_node)
 			node_counter := node_counter + 1
 			nodes.put (l_node, node_counter)
 			Result := node_counter
 		end
 
-	add_child (a_parent_id: INTEGER; a_text: STRING): INTEGER
+	add_child (a_parent_id: INTEGER; a_text: READABLE_STRING_GENERAL): INTEGER
 			-- Add child node to parent, return node ID.
 		require
 			valid_parent: has_node (a_parent_id)
@@ -124,17 +131,18 @@ feature -- Node Creation
 		local
 			l_node: EV_TREE_ITEM
 		do
-			if attached nodes.item (a_parent_id) as parent then
-				create l_node.make_with_text (a_text)
-				l_node.set_data (a_text)
-				parent.extend (l_node)
+			if attached nodes.item (a_parent_id) as al_parent then
+				create l_node.make_with_text (a_text.to_string_32)
+				l_node.set_data (a_text.to_string_32)
+	
+				al_parent.extend (l_node)
 				node_counter := node_counter + 1
 				nodes.put (l_node, node_counter)
 				Result := node_counter
 			end
 		end
 
-	add_child_with_value (a_parent_id: INTEGER; a_text, a_value: STRING): INTEGER
+	add_child_with_value (a_parent_id: INTEGER; a_text, a_value: READABLE_STRING_GENERAL): INTEGER
 			-- Add child node with separate display text and value.
 		require
 			valid_parent: has_node (a_parent_id)
@@ -143,10 +151,11 @@ feature -- Node Creation
 		local
 			l_node: EV_TREE_ITEM
 		do
-			if attached nodes.item (a_parent_id) as parent then
-				create l_node.make_with_text (a_text)
-				l_node.set_data (a_value)
-				parent.extend (l_node)
+			if attached nodes.item (a_parent_id) as al_parent then
+				create l_node.make_with_text (a_text.to_string_32)
+				l_node.set_data (a_value.to_string_32)
+	
+				al_parent.extend (l_node)
 				node_counter := node_counter + 1
 				nodes.put (l_node, node_counter)
 				Result := node_counter
@@ -155,13 +164,13 @@ feature -- Node Creation
 
 feature -- Bulk Operations
 
-	add_roots (a_items: ARRAY [STRING]): like Current
+	add_roots (a_items: ARRAY [READABLE_STRING_GENERAL]): like Current
 			-- Add multiple root nodes.
 		require
 			items_attached: a_items /= Void
 		do
-			across a_items as item loop
-				add_root (item.item).do_nothing
+			across a_items as ic_item loop
+				add_root (ic_item.item).do_nothing
 			end
 			Result := Current
 		ensure
@@ -185,8 +194,8 @@ feature -- Selection Operations
 		require
 			valid_id: has_node (a_node_id)
 		do
-			if attached nodes.item (a_node_id) as node then
-				node.enable_select
+			if attached nodes.item (a_node_id) as al_node then
+				al_node.enable_select
 				notify_selection_change
 			end
 		end
@@ -194,8 +203,8 @@ feature -- Selection Operations
 	deselect_all
 			-- Clear selection.
 		do
-			if attached ev_tree.selected_item as node then
-				node.disable_select
+			if attached ev_tree.selected_item as al_node then
+				al_node.disable_select
 			end
 		ensure
 			no_selection: not has_selection
@@ -206,16 +215,16 @@ feature -- Expansion
 	expand_all
 			-- Expand all nodes.
 		do
-			across ev_tree as node loop
-				expand_recursive (node.item)
+			across ev_tree as ic_node loop
+				expand_recursive (ic_node.item)
 			end
 		end
 
 	collapse_all
 			-- Collapse all nodes.
 		do
-			across ev_tree as node loop
-				collapse_recursive (node.item)
+			across ev_tree as ic_node loop
+				collapse_recursive (ic_node.item)
 			end
 		end
 
@@ -224,8 +233,8 @@ feature -- Expansion
 		require
 			valid_id: has_node (a_node_id)
 		do
-			if attached nodes.item (a_node_id) as node then
-				node.expand
+			if attached nodes.item (a_node_id) as al_node then
+				al_node.expand
 			end
 		end
 
@@ -234,8 +243,8 @@ feature -- Expansion
 		require
 			valid_id: has_node (a_node_id)
 		do
-			if attached nodes.item (a_node_id) as node then
-				node.collapse
+			if attached nodes.item (a_node_id) as al_node then
+				al_node.collapse
 			end
 		end
 
@@ -279,6 +288,15 @@ feature -- Events
 			result_is_current: Result = Current
 		end
 
+feature -- Theme
+
+	apply_theme
+			-- Apply theme colors to tree.
+		do
+			ev_tree.set_foreground_color (tokens.text_primary.to_ev_color)
+			ev_tree.set_background_color (tokens.surface.to_ev_color)
+		end
+
 feature {NONE} -- Implementation
 
 	nodes: HASH_TABLE [EV_TREE_ITEM, INTEGER]
@@ -291,16 +309,16 @@ feature {NONE} -- Implementation
 			-- Expand node and all children.
 		do
 			a_node.expand
-			across a_node as child loop
-				expand_recursive (child.item)
+			across a_node as ic_child loop
+				expand_recursive (ic_child.item)
 			end
 		end
 
 	collapse_recursive (a_node: EV_TREE_NODE)
 			-- Collapse node and all children.
 		do
-			across a_node as child loop
-				collapse_recursive (child.item)
+			across a_node as ic_child loop
+				collapse_recursive (ic_child.item)
 			end
 			a_node.collapse
 		end

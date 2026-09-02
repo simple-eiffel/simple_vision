@@ -9,6 +9,9 @@ class
 
 inherit
 	SV_WIDGET
+		redefine
+			apply_theme
+		end
 
 create
 	make
@@ -277,6 +280,16 @@ feature -- Events
 			Result := Current
 		ensure
 			result_is_current: Result = Current
+		end
+
+feature -- Theme
+
+	apply_theme
+			-- Apply theme colors and font to tab panel.
+		do
+			ev_notebook.set_background_color (tokens.surface.to_ev_color)
+			ev_notebook.set_foreground_color (tokens.text_primary.to_ev_color)
+			ev_notebook.set_font (theme.scaled_font)
 		end
 
 feature {NONE} -- Implementation

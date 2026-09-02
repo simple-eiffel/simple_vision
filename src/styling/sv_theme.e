@@ -467,21 +467,66 @@ feature -- Scaled Values (Apply scaling to base values)
 	space_xl: INTEGER do Result := scaled_size (tokens.space_xl) end
 
 	scaled_font: EV_FONT
-			-- Create a font with scaled medium size.
+			-- Create a font at base_font_points size (DPI-aware via set_height_in_points).
+		local
+			l_points: INTEGER
 		do
-			create Result.make_with_values ({EV_FONT_CONSTANTS}.family_sans, {EV_FONT_CONSTANTS}.weight_regular, {EV_FONT_CONSTANTS}.shape_regular, font_size_md)
+			l_points := scaled_point_size (base_font_points)
+			create Result
+			Result.set_family ({EV_FONT_CONSTANTS}.family_sans)
+			Result.set_weight ({EV_FONT_CONSTANTS}.weight_regular)
+			Result.set_shape ({EV_FONT_CONSTANTS}.shape_regular)
+			Result.set_height_in_points (l_points)
 		end
 
-	scaled_font_with_size (a_base_size: INTEGER): EV_FONT
-			-- Create a font with specified base size, scaled.
+	scaled_font_with_size (a_base_points: INTEGER): EV_FONT
+			-- Create a font at the given base point size, scaled.
+		local
+			l_points: INTEGER
 		do
-			create Result.make_with_values ({EV_FONT_CONSTANTS}.family_sans, {EV_FONT_CONSTANTS}.weight_regular, {EV_FONT_CONSTANTS}.shape_regular, scaled_font_size (a_base_size))
+			l_points := scaled_point_size (a_base_points)
+			create Result
+			Result.set_family ({EV_FONT_CONSTANTS}.family_sans)
+			Result.set_weight ({EV_FONT_CONSTANTS}.weight_regular)
+			Result.set_shape ({EV_FONT_CONSTANTS}.shape_regular)
+			Result.set_height_in_points (l_points)
 		end
 
 	scaled_font_bold: EV_FONT
-			-- Create a bold font with scaled medium size.
+			-- Create a bold font at base_font_points size (DPI-aware).
+		local
+			l_points: INTEGER
 		do
-			create Result.make_with_values ({EV_FONT_CONSTANTS}.family_sans, {EV_FONT_CONSTANTS}.weight_bold, {EV_FONT_CONSTANTS}.shape_regular, font_size_md)
+			l_points := scaled_point_size (base_font_points)
+			create Result
+			Result.set_family ({EV_FONT_CONSTANTS}.family_sans)
+			Result.set_weight ({EV_FONT_CONSTANTS}.weight_bold)
+			Result.set_shape ({EV_FONT_CONSTANTS}.shape_regular)
+			Result.set_height_in_points (l_points)
+		end
+
+	base_font_points: INTEGER
+			-- Base font size in points for the application (default 11pt).
+		attribute
+			Result := 11
+		end
+
+	set_base_font_points (a_points: INTEGER)
+			-- Set the base font size in points.
+		require
+			valid_points: a_points >= 6 and a_points <= 48
+		do
+			base_font_points := a_points
+		ensure
+			points_set: base_font_points = a_points
+		end
+
+	scaled_point_size (a_base_points: INTEGER): INTEGER
+			-- Apply font_scale and ui_scale to a base point size.
+		do
+			Result := (a_base_points.to_real * font_scale * ui_scale).rounded.max (6)
+		ensure
+			minimum_six: Result >= 6
 		end
 
 feature -- Preference Persistence
