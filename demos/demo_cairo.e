@@ -81,7 +81,7 @@ feature {NONE} -- Widget Creation
 			-- Create waveform with initial sine wave
 			demo_waveform := waveform (450, 80).id ("waveform_audio")
 			l_samples := generate_sine_wave (450)
-			demo_waveform
+			demo_waveform := demo_waveform
 				.set_waveform_color_hex (0x3498DB)
 				.set_background_color_hex (0x2C3E50)
 				.enable_center_line
@@ -199,12 +199,14 @@ feature {NONE} -- Waveform Generation
 			l_i: INTEGER
 			l_val: REAL_64
 			l_pi: REAL_64
+			l_math: DOUBLE_MATH
 		do
 			l_pi := 3.14159265358979
+			create l_math
 			create Result.make_filled (0, 1, a_count)
 			from l_i := 1 until l_i > a_count loop
-				l_val := (l_i * l_pi * 6 / a_count).sine * 0.7
-				l_val := l_val + (l_i * l_pi * 12 / a_count).sine * 0.2
+				l_val := l_math.sine (l_i * l_pi * 6 / a_count) * 0.7
+				l_val := l_val + l_math.sine (l_i * l_pi * 12 / a_count) * 0.2
 				Result [l_i] := (l_val * 32767).truncated_to_integer.to_integer_16
 				l_i := l_i + 1
 			end
@@ -241,13 +243,15 @@ feature {NONE} -- Waveform Generation
 			l_val: REAL_64
 			l_pi: REAL_64
 			l_rand: RANDOM
+			l_math: DOUBLE_MATH
 		do
 			l_pi := 3.14159265358979
+			create l_math
 			create l_rand.make
 			l_rand.start
 			create Result.make_filled (0, 1, a_count)
 			from l_i := 1 until l_i > a_count loop
-				l_val := (l_i * l_pi * 4 / a_count).sine * (0.3 + l_rand.double_item * 0.6)
+				l_val := l_math.sine (l_i * l_pi * 4 / a_count) * (0.3 + l_rand.double_item * 0.6)
 				l_rand.forth
 				Result [l_i] := (l_val * 32767).truncated_to_integer.to_integer_16
 				l_i := l_i + 1

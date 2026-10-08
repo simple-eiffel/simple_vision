@@ -209,7 +209,7 @@ feature {NONE} -- Widget Creation
 
 feature {NONE} -- Event Handlers: Theme Mode
 
-	on_theme_mode_change (a_value: STRING)
+	on_theme_mode_change (a_value: STRING_32)
 			-- Handle theme mode radio selection.
 		do
 			if a_value.same_string ("Light") then

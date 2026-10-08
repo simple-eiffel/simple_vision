@@ -21,6 +21,8 @@ feature {NONE} -- Initialization
 			is_dark_mode := False
 			theme_mode := Mode_light
 			font_scale := 1.0
+			ui_scale := 1.0
+			base_font_points := 11
 			load_material_light
 			load_user_preferences
 		end
@@ -34,11 +36,8 @@ feature -- Access
 			-- Is dark mode currently active?
 
 	theme_mode: INTEGER
-			-- Current theme mode.
+			-- Current theme mode (initialized to `Mode_light' in `make_internal').
 			-- See mode constants below.
-		attribute
-			Result := Mode_light
-		end
 
 	color_scheme: STRING
 			-- Current color scheme name.
@@ -53,9 +52,6 @@ feature -- Access
 	ui_scale: REAL
 			-- Overall UI scale factor (like browser zoom).
 			-- Affects fonts, spacing, borders - everything proportionally.
-		attribute
-			Result := 1.0
-		end
 
 feature -- Theme Mode Constants
 
@@ -506,10 +502,8 @@ feature -- Scaled Values (Apply scaling to base values)
 		end
 
 	base_font_points: INTEGER
-			-- Base font size in points for the application (default 11pt).
-		attribute
-			Result := 11
-		end
+			-- Base font size in points for the application (default 11pt,
+			-- set in `make_internal').
 
 	set_base_font_points (a_points: INTEGER)
 			-- Set the base font size in points.

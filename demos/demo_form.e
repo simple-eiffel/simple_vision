@@ -41,7 +41,6 @@ feature {NONE} -- UI Building
 			l_form_widget: SV_WIDGET
 			l_submit_btn, l_reset_btn, l_theme_btn: SV_BUTTON
 			l_button_row: SV_ROW
-			l_status: SV_TEXT
 		do
 			Result := window ("Form Validation Demo - Phase 6.75").size (500, 450)
 

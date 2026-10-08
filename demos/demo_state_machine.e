@@ -153,7 +153,7 @@ feature {NONE} -- State Machine
 			media_player.on ("eject").from_state ("paused").to ("idle").apply.do_nothing
 
 			-- Set initial state
-			media_player.set_initial ("idle").do_nothing
+			media_player.set_initial ("idle")
 		end
 
 feature {NONE} -- Event Handlers
